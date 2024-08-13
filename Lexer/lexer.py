@@ -1,12 +1,6 @@
 from Lexer.mytoken import Token, Tokens
 from Lexer.myerror import Position, IllegalCharacterError
 
-# Token = token.Token
-# Tokens = token.Tokens
-# Position = myerror.Position
-# IllegalCharacterError = myerror.IllegalCharacterError
-DIGITS = '0123456789'
-
 class Lexer:
     def __init__(self, fn, text):
         self.fn = fn
@@ -25,10 +19,8 @@ class Lexer:
         while self.current_char != None:
             if self.current_char in ' \t':
                 self.advance()
-            elif self.current_char in DIGITS:
+            elif self.current_char in Tokens.DIGITS.value:
                 tokens.append(self.make_number())
-            # elif self.current_char in Tokens.LETTERS:
-            #     tokens.append(self.make_word())
             elif self.current_char == '+':
                 tokens.append(Token(Tokens.ADD))
                 self.advance()
@@ -56,6 +48,12 @@ class Lexer:
             elif self.current_char == '>':
                 tokens.append(Token(self.make_equel(Tokens.GREATERE,Tokens.GREATER)))
                 self.advance()
+            # elif self.current_char == 't':
+            #     tokens.append(self.make_boolean())
+            #     self.advance()
+            # elif self.current_char == 'f':
+            #     tokens.append(self.make_boolean())
+            #     self.advance()
             elif self.current_char == '(':
                 tokens.append(Token(Tokens.LPAREN))
                 self.advance()
@@ -74,12 +72,13 @@ class Lexer:
                 self.advance()
                 return [], IllegalCharacterError(start_pos, self.pos, "'" + char + "'")
                        
+        tokens.append(Token(Tokens.EOF))               
         return tokens,None
     
     def make_number(self):
         num_str = ''
         
-        while self.current_char != None and self.current_char in DIGITS:
+        while self.current_char != None and self.current_char in Tokens.DIGITS.value:
             num_str += self.current_char
             self.advance()
             
@@ -97,6 +96,28 @@ class Lexer:
             return Token(equel_token)
         return Token(alternative_token)
     
+    #possible implementation of boolean
+    def make_boolean(self):
+        bool_str = ''
+        
+        if self.current_char == 't':
+            for i in range(4):
+                bool_str += self.current_char
+                self.advance()
+                if self.current_char == None or self.current_char not in Tokens.TRUE.value:
+                    break
+            if bool_str == 'true':
+                return Token(Tokens.BOOL, True)
+
+        elif self.current_char == 'f':
+            for i in range(5):
+                bool_str += self.current_char
+                self.advance()
+                if self.current_char == None or self.current_char not in Tokens.FALSE.value:
+                    break
+            if bool_str == 'false':
+                return Token(Tokens.BOOL, False)
+        return None
 
 def run(fn, text):
     lexer = Lexer(fn, text)

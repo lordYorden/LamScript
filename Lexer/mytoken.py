@@ -27,10 +27,14 @@ class Tokens(Enum):
     RPAREN = ')'
     LBRCE = '{'
     RBRCE = '}'
+    #boolean 
+    TRUE = 'true'
+    FALSE = 'false'
     #other
     DIGITS = '0123456789'
     LETTERS = string.ascii_letters
     ASSIGN = '='
+    EOF = 'EOF'
 
 class Token:
     def __init__(self, type, value=None):
