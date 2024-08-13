@@ -45,22 +45,16 @@ class Lexer:
                 tokens.append(Token(Tokens.MOD))
                 self.advance()
             elif self.current_char == '=':
-                tokens.append(Token(Tokens.EQUEL))
+                tokens.append(Token(self.make_equel(Tokens.EQUEL,Tokens.ASSIGN)))
                 self.advance()
             elif self.current_char == '!':
-                tokens.append(Token(Tokens.NOT))
+                tokens.append(Token(self.make_equel(Tokens.NEQUEL,Tokens.NOT)))
                 self.advance()
             elif self.current_char == '<':
-                tokens.append(Token(Tokens.LESS))
-                self.advance()
-            elif self.current_char == '<=':
-                tokens.append(Token(Tokens.LESSE))
+                tokens.append(Token(self.make_equel(Tokens.LESSE,Tokens.LESS)))
                 self.advance()
             elif self.current_char == '>':
-                tokens.append(Token(Tokens.GREATER))
-                self.advance()
-            elif self.current_char == '>=':
-                tokens.append(Token(Tokens.GREATERE))
+                tokens.append(Token(self.make_equel(Tokens.GREATERE,Tokens.GREATER)))
                 self.advance()
             elif self.current_char == '(':
                 tokens.append(Token(Tokens.LPAREN))
@@ -94,10 +88,16 @@ class Lexer:
     def make_whole_div(self):
         self.advance()
         if self.current_char == '/':
-            self.advance()
             return Token(Tokens.IDIV)
         return Token(Tokens.DIV)
     
+    def make_equel(self, equel_token,alternative_token):
+        self.advance()
+        if self.current_char == '=':
+            return Token(equel_token)
+        return Token(alternative_token)
+    
+
 def run(fn, text):
     lexer = Lexer(fn, text)
     tokens, error = lexer.make_tokens()

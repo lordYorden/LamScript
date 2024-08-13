@@ -16,7 +16,7 @@ class Tokens(Enum):
     OR = '||'
     AND = '&&'
     NOT = '!'
-    EQUEL = '='
+    EQUEL = '=='
     NEQUEL = '!='
     LESS = '<'
     LESSE = '<='
@@ -30,6 +30,7 @@ class Tokens(Enum):
     #other
     DIGITS = '0123456789'
     LETTERS = string.ascii_letters
+    ASSIGN = '='
 
 class Token:
     def __init__(self, type, value=None):
