@@ -12,6 +12,10 @@ class Lexer:
     def advance(self):
         self.pos.advance()
         self.current_char = self.text[self.pos.index] if self.pos.index < len(self.text) else None
+        
+    def backtrack(self):
+        self.pos.backtrack()
+        self.current_char = self.text[self.pos.index] if self.pos.index < len(self.text) else None
     
     def make_tokens(self):
         tokens = []
@@ -19,22 +23,22 @@ class Lexer:
         while self.current_char != None:
             if self.current_char in ' \t':
                 self.advance()
-            elif self.current_char in Tokens.DIGITS.value:
+            elif self.current_char in Tokens.DIGITS:
                 tokens.append(self.make_number())
             elif self.current_char == '+':
-                tokens.append(Token(Tokens.ADD))
+                tokens.append(Token(Tokens.ADD, pos_start=self.pos))
                 self.advance()
             elif self.current_char == '-':
-                tokens.append(Token(Tokens.SUB))
+                tokens.append(Token(Tokens.SUB, pos_start=self.pos))
                 self.advance()
             elif self.current_char == '*':
-                tokens.append(Token(Tokens.MUL))
+                tokens.append(Token(Tokens.MUL, pos_start=self.pos))
                 self.advance()
             elif self.current_char == '/':
                 tokens.append(self.make_whole_div())
                 self.advance()
             elif self.current_char == '%':
-                tokens.append(Token(Tokens.MOD))
+                tokens.append(Token(Tokens.MOD, pos_start=self.pos))
                 self.advance()
             elif self.current_char == '=':
                 tokens.append(Token(self.make_equel(Tokens.EQUEL,Tokens.ASSIGN)))
@@ -48,78 +52,83 @@ class Lexer:
             elif self.current_char == '>':
                 tokens.append(Token(self.make_equel(Tokens.GREATERE,Tokens.GREATER)))
                 self.advance()
-            # elif self.current_char == 't':
-            #     tokens.append(self.make_boolean())
-            #     self.advance()
-            # elif self.current_char == 'f':
-            #     tokens.append(self.make_boolean())
-            #     self.advance()
+            elif self.current_char == 't' or self.current_char == 'f':
+                tok, error = self.make_boolean()
+                if error:
+                    return [], error
+                tokens.append(tok)
+                self.advance()
             elif self.current_char == '(':
-                tokens.append(Token(Tokens.LPAREN))
+                tokens.append(Token(Tokens.LPAREN, pos_start=self.pos))
                 self.advance()
             elif self.current_char == ')':
-                tokens.append(Token(Tokens.RPAREN))
+                tokens.append(Token(Tokens.RPAREN, pos_start=self.pos))
                 self.advance()
-            elif self.current_char == '{':
-                tokens.append(Token(Tokens.LBRCE))
-                self.advance()
-            elif self.current_char == '}':
-                tokens.append(Token(Tokens.RBRCE))
-                self.advance()
+            # elif self.current_char == '{':
+            #     tokens.append(Token(Tokens.LBRCE))
+            #     self.advance()
+            # elif self.current_char == '}':
+            #     tokens.append(Token(Tokens.RBRCE))
+            #     self.advance()
             else:
                 start_pos = self.pos.copy()
                 char = self.current_char
                 self.advance()
                 return [], IllegalCharacterError(start_pos, self.pos, "'" + char + "'")
                        
-        tokens.append(Token(Tokens.EOF))               
+        tokens.append(Token(Tokens.EOF, pos_start=self.pos))               
         return tokens,None
     
     def make_number(self):
         num_str = ''
+        pos_start = self.pos.copy()
         
-        while self.current_char != None and self.current_char in Tokens.DIGITS.value:
+        while self.current_char != None and self.current_char in Tokens.DIGITS:
             num_str += self.current_char
             self.advance()
             
-        return Token(Tokens.INT, int(num_str))
+        return Token(Tokens.INT, int(num_str), pos_start=pos_start, pos_end=self.pos)
     
     def make_whole_div(self):
+        pos_start = self.pos.copy()
         self.advance()
         if self.current_char == '/':
-            return Token(Tokens.IDIV)
-        return Token(Tokens.DIV)
+            return Token(Tokens.IDIV, pos_start=pos_start, pos_end=self.pos)
+        self.backtrack()
+        return Token(Tokens.DIV, pos_start=pos_start)
     
     def make_equel(self, equel_token,alternative_token):
+        pos_start = self.pos.copy()
         self.advance()
         if self.current_char == '=':
-            return Token(equel_token)
-        return Token(alternative_token)
+            return Token(equel_token, pos_start=pos_start, pos_end=self.pos)
+        self.backtrack()
+        return Token(alternative_token, pos_start=pos_start)
     
+    #deprected for now
     #possible implementation of boolean
     def make_boolean(self):
         bool_str = ''
+        pos_start = self.pos.copy()
         
         if self.current_char == 't':
             for i in range(4):
                 bool_str += self.current_char
                 self.advance()
-                if self.current_char == None or self.current_char not in Tokens.TRUE.value:
+                if self.current_char == None or self.current_char not in Tokens.TRUE:
                     break
             if bool_str == 'true':
-                return Token(Tokens.BOOL, True)
+                self.backtrack()
+                return Token(Tokens.BOOL, True, pos_start=pos_start, pos_end=self.pos), None
 
         elif self.current_char == 'f':
             for i in range(5):
                 bool_str += self.current_char
                 self.advance()
-                if self.current_char == None or self.current_char not in Tokens.FALSE.value:
+                if self.current_char == None or self.current_char not in Tokens.FALSE:
                     break
             if bool_str == 'false':
-                return Token(Tokens.BOOL, False)
-        return None
-
-def run(fn, text):
-    lexer = Lexer(fn, text)
-    tokens, error = lexer.make_tokens()
-    return tokens, error
+                self.backtrack()
+                return Token(Tokens.BOOL, False, pos_start=pos_start, pos_end=self.pos), None
+             
+        return None, IllegalCharacterError(pos_start, self.pos, "'" + bool_str + "'")

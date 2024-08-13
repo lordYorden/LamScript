@@ -1,0 +1,9 @@
+
+<expr> := <term> <low_order_op> <term>
+<term> := <factor> <high_order_op> <factor>
+<factor> := <int> | <low_order_op> <int> | ( <factor> )
+
+<int> :=  <non_zero_dig> <int> | <non_zero_dig> | 0
+<non_zero_dig> := 1..9
+<high_order_op> := * | / | // | %
+<low_order_op> := + | -

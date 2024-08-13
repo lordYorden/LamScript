@@ -27,6 +27,15 @@ class Position:
             self.col = 0
 
         return self
+    
+    def backtrack(self, previous_char=None):
+        self.index -= 1
+        self.col -= 1
+        
+        if previous_char == '\n':
+            pass #fix in future
+        return self
+    
 
     def copy(self):
         return Position(self.index, self.ln, self.col, self.fn, self.ftxt)
@@ -34,3 +43,7 @@ class Position:
 class IllegalCharacterError(Error):
     def __init__(self, pos_start, pos_end, details):
         super().__init__(pos_start, pos_end, 'Illegal Character', details)
+        
+class InvalidSyntaxError(Error):
+    def __init__(self, pos_start, pos_end, details):
+        super().__init__(pos_start, pos_end, 'Invalid Syntax', details)
