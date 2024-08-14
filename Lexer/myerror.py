@@ -50,3 +50,30 @@ class InvalidSyntaxError(Error):
 class ExpectedCharError(Error):
     def __init__(self, pos_start, pos_end, details):
         super().__init__(pos_start, pos_end, 'Expected Character', details)
+
+# class RunTimeError(Error):
+#     def __init__(self, pos_start, pos_end, details, context):
+#         super().__init__(pos_start, pos_end, 'Runtime Error', details)
+#         self.context = context
+
+#     def as_string(self):
+#         result = self.generate_traceback()
+#         result += f"{self.error_name}: {self.details}"
+#         result += f"\nFile {self.pos_start.fn}, line {self.pos_start.ln + 1} col {self.pos_start.col}"
+#         return result
+
+#     def generate_traceback(self):
+#         result = ''
+#         pos = self.pos_start
+#         ctx = self.context
+
+#         while ctx:
+#             result = f"  File {pos.fn}, line {str(pos.ln + 1)} col {str(pos.col)} in {ctx.display_name}\n" + result
+#             pos = ctx.parent_entry_pos
+#             ctx = ctx.parent
+
+#         return "Traceback (most recent call last):\n" + result
+    
+class TypeError(Error):
+    def __init__(self, pos_start, pos_end, details):
+        super().__init__(pos_start, pos_end, 'Type Error', details)

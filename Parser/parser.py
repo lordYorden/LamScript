@@ -72,10 +72,10 @@ class Parser:
     
     def bool_term(self):
         res = ParseResult()
-        factor = res.register(self.bool_factor())
+        expr = res.register(self.bin_op(self.math_expr, self.bool_high_order_ops))
         if res.error: 
-            return self.bin_op(self.math_expr, self.bool_high_order_ops)
-        return res.success(factor)
+            res.register(self.bool_factor())
+        return res.success(expr)
         
     def bool_factor(self):
         res = ParseResult()
