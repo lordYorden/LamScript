@@ -71,10 +71,10 @@ class Parser:
         return self.bin_op(self.math_term, self.math_low_order_ops)
     
     def bool_term(self):
+        return self.bin_op(self.bool_factor, self.bool_high_order_ops)
         res = ParseResult()
-        expr = res.register(self.bin_op(self.math_expr, self.bool_high_order_ops))
-        if res.error: 
-            res.register(self.bool_factor())
+        expr = res.register(self.bin_op(self.bool_factor, self.bool_high_order_ops))
+        if res.error: return res
         return res.success(expr)
         
     def bool_factor(self):
@@ -89,7 +89,35 @@ class Parser:
             factor = res.register(self.bool_factor())
             if res.error: return res
             return res.success(UnaryOpNode(tok, factor))
-        elif tok.type == Tokens.LPAREN:
+        elif tok.type == Tokens.INT or tok.type == Tokens.LPAREN or tok.type in self.math_low_order_ops:
+            expr = res.register(self.math_expr())
+            if res.error: return res
+            return res.success(expr)
+        else:
+            atom = res.register(self.atom())
+            if res.error: return res
+            return res.success(atom)
+        # elif tok.type == Tokens.LPAREN:
+        #     res.register(self.advance())
+        #     if self.current_token.type == Tokens.BOOL:
+        #         expr = res.register(self.bool_expr())
+        #         if res.error: return res
+        #     elif self.current_token.type == Tokens.INT:
+        #         expr = res.register(self.math_expr())
+        #         if res.error: return res
+                
+        #     if self.current_token.type == Tokens.RPAREN:
+        #         res.register(self.advance())
+        #         return res.success(expr)
+        #     else:
+        #         return res.failure(InvalidSyntaxError(tok.pos_start, tok.pos_end, "Expected ')'"))
+            
+        #return res.failure(InvalidSyntaxError(tok.pos_start, tok.pos_end, "Expected bool or !"))
+        
+    def atom(self):
+        res = ParseResult()
+        tok = self.current_token
+        if tok.type == Tokens.LPAREN:
             res.register(self.advance())
             expr = res.register(self.bool_expr())
             if res.error: return res
@@ -98,13 +126,12 @@ class Parser:
                 return res.success(expr)
             else:
                 return res.failure(InvalidSyntaxError(tok.pos_start, tok.pos_end, "Expected ')'"))
-        return res.failure(InvalidSyntaxError(tok.pos_start, tok.pos_end, "Expected bool or !"))
+        return res.failure(InvalidSyntaxError(tok.pos_start, tok.pos_end, "Expected '('"))
     
     def bool_expr(self):
         return self.bin_op(self.bool_term, self.bool_low_order_pos)
     
 class ParseResult:
-    
     
     def __init__(self):
         self.error = None

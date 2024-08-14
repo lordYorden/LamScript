@@ -1,15 +1,15 @@
 
 <bool_expr> := <bool_term> (<low_order_bool_op> <bool_term>)*
 
-<bool_term> := <math_expr> (<high_order_bool_op> <math_expr>)* | <bool_factor>
+<bool_term> := <bool_factor> (<high_order_bool_op> <bool_factor>)*
 
-<bool_factor> := <bool> | <not> <bool_expr> | ( <bool_expr> )
+<bool_factor> := <bool> | <not> <bool_expr> | <math_expr>
 
-<math_expr> := <term> (<low_order_op> <term>)*
+<math_expr> := <math_term> (<low_order_op> <math_term>)*
 
-<math_term> := <factor> (<high_order_op> <factor>)*
+<math_term> := <math_factor> (<high_order_op> <math_factor>)*
 
-<math_factor> := <int> | <low_order_op> <int> | ( <expr> )
+<math_factor> := <int> | <low_order_op> <math_expr> | ( <math_expr> )
 
 
 
