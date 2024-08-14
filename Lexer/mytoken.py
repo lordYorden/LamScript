@@ -1,7 +1,7 @@
 from enum import Enum
 import string
 
-class Tokens(Enum):
+class Tokens:
     #types
     INT = 'INT'
     BOOL = 'BOOL'
@@ -35,11 +35,20 @@ class Tokens(Enum):
     LETTERS = string.ascii_letters
     ASSIGN = '='
     EOF = 'EOF'
+    WHITESPACE = ' \t'
 
 class Token:
-    def __init__(self, type, value=None):
+    def __init__(self, type, value=None, pos_start=None, pos_end=None):
         self.type = type
         self.value = value
+        
+        if pos_start:
+            self.pos_start = pos_start.copy()
+            self.pos_end = pos_start.copy()
+            self.pos_end.advance()
+        
+        if pos_end:
+            self.pos_end = pos_end.copy()
     
     def __repr__(self):
         if self.value:

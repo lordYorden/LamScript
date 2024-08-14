@@ -1,0 +1,25 @@
+
+<bool_expr> := <bool_term> (<low_order_bool_op> <bool_term>)*
+
+<bool_term> := <math_expr> (<high_order_bool_op> <math_expr>)* | <bool_factor>
+
+<bool_factor> := <bool> | <not> <bool_expr> | ( <bool_expr> )
+
+<math_expr> := <term> (<low_order_op> <term>)*
+
+<math_term> := <factor> (<high_order_op> <factor>)*
+
+<math_factor> := <int> | <low_order_op> <int> | ( <expr> )
+
+
+
+<int> :=  <non_zero_dig> <int> | <non_zero_dig> | 0
+<non_zero_dig> := 1..9
+<high_order_op> := * | / | // | %
+<low_order_op> := + | -
+
+<bool> := true | false
+<not> := !
+<low_order_bool_op> := && | || | <equels>
+<high_order_bool_op> := < | <= | > | >=
+<euqels> := == | != 
