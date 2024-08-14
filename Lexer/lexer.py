@@ -1,5 +1,5 @@
 from Lexer.mytoken import Token, Tokens
-from Lexer.myerror import Position, IllegalCharacterError
+from Lexer.myerror import Position, IllegalCharacterError, ExpectedCharError
 
 class Lexer:
     def __init__(self, fn, text):
@@ -38,19 +38,19 @@ class Lexer:
                 tokens.append(self.make_whole_div())
                 self.advance()
             elif self.current_char == '%':
-                tokens.append(Token(Tokens.MOD, pos_start=self.pos))
+                tokens.append(Tokens.MOD, pos_start=self.pos)
                 self.advance()
             elif self.current_char == '=':
-                tokens.append(Token(self.make_equel(Tokens.EQUEL,Tokens.ASSIGN)))
+                tokens.append(self.make_equel(Tokens.EQUEL,Tokens.ASSIGN))
                 self.advance()
             elif self.current_char == '!':
-                tokens.append(Token(self.make_equel(Tokens.NEQUEL,Tokens.NOT)))
+                tokens.append(self.make_equel(Tokens.NEQUEL,Tokens.NOT))
                 self.advance()
             elif self.current_char == '<':
-                tokens.append(Token(self.make_equel(Tokens.LESSE,Tokens.LESS)))
+                tokens.append(self.make_equel(Tokens.LESSE,Tokens.LESS))
                 self.advance()
             elif self.current_char == '>':
-                tokens.append(Token(self.make_equel(Tokens.GREATERE,Tokens.GREATER)))
+                tokens.append(self.make_equel(Tokens.GREATERE,Tokens.GREATER))
                 self.advance()
             elif self.current_char == 't' or self.current_char == 'f':
                 tok, error = self.make_boolean()
@@ -63,6 +63,18 @@ class Lexer:
                 self.advance()
             elif self.current_char == ')':
                 tokens.append(Token(Tokens.RPAREN, pos_start=self.pos))
+                self.advance()
+            elif self.current_char == '|':
+                tok, error = self.make_or()
+                if error:
+                    return [], error
+                tokens.append(tok)
+                self.advance()
+            elif self.current_char == '&':
+                tok, error = self.make_and()
+                if error:
+                    return [], error
+                tokens.append(tok)
                 self.advance()
             # elif self.current_char == '{':
             #     tokens.append(Token(Tokens.LBRCE))
@@ -97,15 +109,30 @@ class Lexer:
         self.backtrack()
         return Token(Tokens.DIV, pos_start=pos_start)
     
+    def make_or(self):
+        pos_start = self.pos.copy()
+        self.advance()
+        if self.current_char == '|':
+            return Token(Tokens.OR, pos_start=pos_start), None
+        else:
+            return None, ExpectedCharError(pos_start, self.pos, "'|'")
+    
+    def make_and(self):
+        pos_start = self.pos.copy()
+        self.advance()
+        if self.current_char == '&':
+            return Token(Tokens.AND, pos_start=pos_start), None
+        else:
+            return None, ExpectedCharError(pos_start, self.pos, "'&'")
+    
     def make_equel(self, equel_token,alternative_token):
         pos_start = self.pos.copy()
         self.advance()
         if self.current_char == '=':
-            return Token(equel_token, pos_start=pos_start, pos_end=self.pos)
+            return Token(equel_token, pos_start=pos_start)
         self.backtrack()
         return Token(alternative_token, pos_start=pos_start)
     
-    #deprected for now
     #possible implementation of boolean
     def make_boolean(self):
         bool_str = ''

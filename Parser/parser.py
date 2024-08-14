@@ -1,11 +1,13 @@
-from Parser.node import NumberNode, BinOpNode, UnaryOpNode
-from Lexer.mytoken import Tokens
+from Parser.node import NumberNode, BinOpNode, UnaryOpNode, BooleanNode
+from Lexer.mytoken import Tokens, Token
 from Lexer.myerror import InvalidSyntaxError
 
 class Parser:
     parenthesis = (Tokens.LPAREN, Tokens.RPAREN)
-    low_order_ops = (Tokens.ADD, Tokens.SUB)
-    high_order_ops = (Tokens.MUL, Tokens.DIV, Tokens.IDIV, Tokens.MOD)
+    math_low_order_ops = (Tokens.ADD, Tokens.SUB)
+    math_high_order_ops = (Tokens.MUL, Tokens.DIV, Tokens.IDIV, Tokens.MOD)
+    bool_low_order_pos = (Tokens.OR, Tokens.AND, Tokens.EQUEL, Tokens.NEQUEL)
+    bool_high_order_ops = (Tokens.LESS, Tokens.LESSE, Tokens.GREATER, Tokens.GREATERE)
     
     def __init__(self, tokens):
         self.tokens = tokens
@@ -13,7 +15,7 @@ class Parser:
         self.advance()
         
     def parse(self):
-        res = self.expr()
+        res = self.bool_expr()
         if not res.error and self.current_token.type != Tokens.EOF:
             return res.failure(InvalidSyntaxError(self.current_token.pos_start, self.current_token.pos_end, "Expected '+', '-', '*', '/', '//' or '%'"))
         return res
@@ -24,22 +26,22 @@ class Parser:
             self.current_token = self.tokens[self.token_index]
         return self.current_token
     
-    def factor(self):
+    def math_factor(self):
         res = ParseResult()
         tok = self.current_token
         if tok.type in (Tokens.INT):
             res.register(self.advance())
             return res.success(NumberNode(tok))
         
-        elif tok.type in self.low_order_ops:
+        elif tok.type in self.math_low_order_ops:
             res.register(self.advance())
-            factor = res.register(self.factor())
+            factor = res.register(self.math_factor())
             if res.error: return res
             return res.success(UnaryOpNode(tok, factor))
         
         elif tok.type == Tokens.LPAREN:
             res.register(self.advance())
-            expr = res.register(self.expr())
+            expr = res.register(self.math_expr())
             if res.error: return res
             if self.current_token.type == Tokens.RPAREN:
                 res.register(self.advance())
@@ -62,13 +64,48 @@ class Parser:
             left = BinOpNode(left, op_tok, right)
         return res.success(left)
         
-    def term(self):
-        return self.bin_op(self.factor, self.high_order_ops)
+    def math_term(self):
+        return self.bin_op(self.math_factor, self.math_high_order_ops)
 
-    def expr(self):
-        return self.bin_op(self.term, self.low_order_ops)
+    def math_expr(self):
+        return self.bin_op(self.math_term, self.math_low_order_ops)
+    
+    def bool_term(self):
+        res = ParseResult()
+        factor = res.register(self.bool_factor())
+        if res.error: 
+            return self.bin_op(self.math_expr, self.bool_high_order_ops)
+        return res.success(factor)
+        
+    def bool_factor(self):
+        res = ParseResult()
+        tok = self.current_token
+        
+        if tok.type == Tokens.BOOL:
+            res.register(self.advance())
+            return res.success(BooleanNode(tok))
+        elif tok.type == Tokens.NOT:
+            res.register(self.advance())
+            factor = res.register(self.bool_factor())
+            if res.error: return res
+            return res.success(UnaryOpNode(tok, factor))
+        elif tok.type == Tokens.LPAREN:
+            res.register(self.advance())
+            expr = res.register(self.bool_expr())
+            if res.error: return res
+            if self.current_token.type == Tokens.RPAREN:
+                res.register(self.advance())
+                return res.success(expr)
+            else:
+                return res.failure(InvalidSyntaxError(tok.pos_start, tok.pos_end, "Expected ')'"))
+        return res.failure(InvalidSyntaxError(tok.pos_start, tok.pos_end, "Expected bool or !"))
+    
+    def bool_expr(self):
+        return self.bin_op(self.bool_term, self.bool_low_order_pos)
     
 class ParseResult:
+    
+    
     def __init__(self):
         self.error = None
         self.node = None
