@@ -24,7 +24,7 @@ class Parser:
     def parse(self):
         res = self.bool_expr()
         if not res.error and self.current_token.type != Tokens.EOF:
-            return res.failure(InvalidSyntaxError(self.current_token.pos_start, self.current_token.pos_end, "Expected a different character"))
+            return res.failure(InvalidSyntaxError(self.current_token.pos_start, self.current_token.pos_end, "Unkonwn operation for type"))
         return res
     
     def bool_expr(self):
@@ -38,10 +38,12 @@ class Parser:
         tok = self.current_token
         
         if tok.type == Tokens.BOOL:
-            res.register(self.advance())
+            res.register_advancement()
+            self.advance()
             return res.success(BooleanNode(tok))
         elif tok.type == Tokens.NOT:
-            res.register(self.advance())
+            res.register_advancement()
+            self.advance()
             factor = res.register(self.bool_factor())
             if res.error: return res
             return res.success(UnaryOpNode(tok, factor))
@@ -63,7 +65,8 @@ class Parser:
         res = ParseResult()
         tok = self.current_token
         if tok.type in self.math_low_order_ops:
-            res.register(self.advance())
+            res.register_advancement()
+            self.advance()
             factor = res.register(self.math_factor())
             if res.error: return res
             return res.success(UnaryOpNode(tok, factor))
@@ -76,27 +79,30 @@ class Parser:
         res = ParseResult()
         tok = self.current_token
         if tok.type == Tokens.INT:
-            res.register(self.advance())
+            res.register_advancement()
+            self.advance()
             return res.success(NumberNode(tok))
         elif tok.type == Tokens.LPAREN:
             return self.parentized_expr()
         elif tok.matches(Tokens.KEYWORD, Tokens.WHILE):
-            #res.register(self.advance())
+            #res.register_advancement()
             expr = res.register(self.while_expr())
             if res.error: return res
             return res.success(expr)
             
-        return res.failure(InvalidSyntaxError(tok.pos_start, self.current_token.pos_end, "Expected '( or int'"))
+        return res.failure(InvalidSyntaxError(tok.pos_start, self.current_token.pos_end, "Expected '(, int, or while'"))
     
     def parentized_expr(self):
         res = ParseResult()
         tok = self.current_token
-        res.register(self.advance())
+        res.register_advancement()
+        self.advance()
         expr = res.register(self.bool_expr())
         if res.error: return res
         
         if self.current_token.type == Tokens.RPAREN:
-            res.register(self.advance())
+            res.register_advancement()
+            self.advance()
             return res.success(expr)
         else:
             return res.failure(InvalidSyntaxError(tok.pos_start, self.current_token.pos_end, "Expected ')'"))
@@ -105,7 +111,8 @@ class Parser:
         res = ParseResult()
         tok = self.current_token
             
-        res.register(self.advance()) 
+        res.register_advancement() 
+        self.advance()
         if self.current_token.type == Tokens.LPAREN:
             condition = res.register(self.parentized_expr())
             if res.error: return res
@@ -113,12 +120,14 @@ class Parser:
         if self.current_token.type == Tokens.LBRCE:
             tok = self.current_token
             
-            res.register(self.advance())
+            res.register_advancement()
+            self.advance()
             body = res.register(self.bool_expr())
             if res.error: return res
             
             if self.current_token.type == Tokens.RBRCE:
-                res.register(self.advance())
+                res.register_advancement()
+                self.advance()
                 return res.success(whileNode(condition, body))
             else:
                 return res.failure(InvalidSyntaxError(tok.pos_start, self.current_token.pos_end, "Expected '}'"))
@@ -132,7 +141,8 @@ class Parser:
         
         while self.current_token.type in ops:
             op_tok = self.current_token
-            res.register(self.advance())
+            res.register_advancement()
+            self.advance()
             right = res.register(func())
             if res.error: return res
             left = BinOpNode(left, op_tok, right)
@@ -144,17 +154,22 @@ class ParseResult:
     def __init__(self):
         self.error = None
         self.node = None
+        self.advance_count = 0
     
     def register(self, res):
-        if isinstance(res, ParseResult):
-            if res.error: self.error = res.error
-            return res.node
-        return res
+        self.advance_count += res.advance_count
+        if res.error: self.error = res.error
+        return res.node
+    
+    def register_advancement(self):
+        self.advance_count += 1
+        return self
     
     def success(self, node):
         self.node = node
         return self
     
     def failure(self, error):
-        self.error = error
+        if not self.error or self.advance_count == 0:
+            self.error = error
         return self
