@@ -13,7 +13,9 @@
 
 <math_factor> := <low_order_op> <math_expr> | <atom>
 
-<atom> :=  <int> |  ( <bool_expr> )
+<atom> :=  <int> |  ( <bool_expr> ) | <while_expr>
+
+<while_expr> := while (<bool_expr>) { <bool_expr> }
 
 
 (true == true)

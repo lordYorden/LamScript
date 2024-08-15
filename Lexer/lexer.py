@@ -82,10 +82,10 @@ class Lexer:
                 tokens.append(tok)
                 self.advance()
             elif self.current_char == '{':
-                tokens.append(Token(Tokens.LBRCE))
+                tokens.append(Token(Tokens.LBRCE, pos_start=self.pos))
                 self.advance()
             elif self.current_char == '}':
-                tokens.append(Token(Tokens.RBRCE))
+                tokens.append(Token(Tokens.RBRCE, pos_start=self.pos))
                 self.advance()
             else:
                 start_pos = self.pos.copy()

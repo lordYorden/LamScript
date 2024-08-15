@@ -1,4 +1,4 @@
-from Parser.node import NumberNode, BinOpNode, UnaryOpNode, BooleanNode
+from Parser.node import NumberNode, BinOpNode, UnaryOpNode, BooleanNode, whileNode
 from Lexer.mytoken import Tokens, Token
 from Lexer.myerror import InvalidSyntaxError
 
@@ -87,9 +87,40 @@ class Parser:
                 res.register(self.advance())
                 return res.success(expr)
             else:
-                return res.failure(InvalidSyntaxError(tok.pos_start, tok.pos_end, "Expected ')'"))
+                return res.failure(InvalidSyntaxError(tok.pos_start, self.current_token.pos_end, "Expected ')'"))
             
-        return res.failure(InvalidSyntaxError(tok.pos_start, tok.pos_end, "Expected '( or int'"))
+        elif tok.type == Tokens.KEYWORD and tok.value == Tokens.WHILE:
+            tok = self.current_token
+            
+            res.register(self.advance()) 
+            if self.current_token.type == Tokens.LPAREN:
+                tok = self.current_token
+                
+                res.register(self.advance()) 
+                condition = res.register(self.bool_expr())
+                if res.error: return res
+                
+                if self.current_token.type == Tokens.RPAREN:
+                    res.register(self.advance())
+                else:
+                    return res.failure(InvalidSyntaxError(tok.pos_start, self.current_token.pos_end, "Expected ')'"))
+            
+            if self.current_token.type == Tokens.LBRCE:
+                tok = self.current_token
+                
+                res.register(self.advance())
+                body = res.register(self.bool_expr())
+                if res.error: return res
+                
+                if self.current_token.type == Tokens.RBRCE:
+                    res.register(self.advance())
+                    return res.success(whileNode(condition, body))
+                else:
+                    return res.failure(InvalidSyntaxError(tok.pos_start, self.current_token.pos_end, "Expected '}'"))
+            else:
+                return res.failure(InvalidSyntaxError(tok.pos_start, self.current_token.pos_end, "Expected '{'"))
+            
+        return res.failure(InvalidSyntaxError(tok.pos_start, self.current_token.pos_end, "Expected '( or int'"))
     
     def bin_op(self, func, ops):
         res = ParseResult()

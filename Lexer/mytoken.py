@@ -37,8 +37,9 @@ class Tokens:
     ASSIGN = '='
     EOF = 'EOF'
     WHITESPACE = ' \t'
+    WHILE = 'while'
     KEYWORD = 'KEYWORD'
-    KEYWORDS = ['while', 'def', 'return']
+    KEYWORDS = [WHILE, 'def', 'return']
 
 class Token:
     def __init__(self, type, value=None, pos_start=None, pos_end=None):
