@@ -34,11 +34,13 @@ class Tokens:
     #other
     DIGITS = '0123456789'
     LETTERS = string.ascii_letters
+    LETTERS_DIGITS = LETTERS + DIGITS
     ASSIGN = '='
     EOF = 'EOF'
     WHITESPACE = ' \t'
     WHILE = 'while'
     KEYWORD = 'KEYWORD'
+    IDENTIFIER = 'IDENTIFIER'
     KEYWORDS = [WHILE, 'def', 'return']
 
 class Token:

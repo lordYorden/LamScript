@@ -2,7 +2,7 @@ from Interpreter.Objects.Number import Number
 from Interpreter.Objects.Boolean import Boolean
 from Interpreter.Objects.Object import Object
 from Interpreter.RuntimeResult import RuntimeResult
-from Lexer.myerror import RunTimeError
+from Error.RuntimeError import RunTimeError
 
 class Interpreter:
     def visit(self, node, context):
@@ -44,6 +44,15 @@ class Interpreter:
         if error: return res.failure(error)
         
         return res.success(object.set_pos(node.pos_start, node.pos_end))
+    
+    def visit_SymbolAcsessNode(self, node, context):
+        res = RuntimeResult()
+        sym_name = node.identifier_token.value
+        value = context.symbol_table.get(sym_name)
+        
+        if not value:
+            return res.failure(RunTimeError(node.pos_start, node.pos_end, f"'{sym_name}' is not defined", context))
+        return res.success(value)
     
     def visit_whileNode(self, node, context):
         res = RuntimeResult()

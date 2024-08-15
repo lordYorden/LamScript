@@ -1,7 +1,6 @@
 from Interpreter.Objects.Object import Object
 import Interpreter.Operations.BooleanOperations as BooleanOperation
-from Lexer.mytoken import Tokens
-from Lexer.myerror import TypeError
+from Lexer.Tokens import Tokens
 
 class Boolean(Object):
     bin_operations = {Tokens.EQUEL: BooleanOperation.equels, 

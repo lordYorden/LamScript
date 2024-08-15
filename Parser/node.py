@@ -1,4 +1,4 @@
-from Lexer.mytoken import Tokens
+from Lexer.Tokens import Tokens
 class NumberNode:
     def __init__(self, token):
         self.token = token
@@ -50,3 +50,12 @@ class whileNode:
 
     def __repr__(self):
         return f'while ({self.condition_node}) {Tokens.LBRCE} {self.body_node} {Tokens.RBRCE}'
+    
+class SymbolAcsessNode:
+    def __init__(self, identifier_token):
+        self.identifier_token = identifier_token
+        self.pos_start = identifier_token.pos_start
+        self.pos_end = identifier_token.pos_end
+
+    def __repr__(self):
+        return f'{self.identifier_token}'

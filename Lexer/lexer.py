@@ -1,5 +1,5 @@
-from Lexer.mytoken import Token, Tokens
-from Lexer.myerror import Position, IllegalCharacterError, ExpectedCharError
+from Lexer.Tokens import Token, Tokens
+from Error.Error import Position, IllegalCharacterError, ExpectedCharError
 
 class Lexer:
     def __init__(self, fn, text):
@@ -26,9 +26,7 @@ class Lexer:
             elif self.current_char in Tokens.DIGITS:
                 tokens.append(self.make_number())
             elif self.current_char in Tokens.LETTERS:
-                tok, error = self.make_keyworrd()
-                if error:
-                    return [], error
+                tok = self.make_keyword_bool_identifier()
                 tokens.append(tok)
             elif self.current_char == '+':
                 tokens.append(Token(Tokens.ADD, pos_start=self.pos))
@@ -138,26 +136,26 @@ class Lexer:
         self.backtrack()
         return Token(alternative_token, pos_start=pos_start)
     
-    def make_keyworrd(self):
+    def make_keyword_bool_identifier(self):
         key_str = ''
         pos_start = self.pos.copy()
 
-        while self.current_char != None and self.current_char in Tokens.LETTERS:
+        while self.current_char != None and self.current_char in Tokens.LETTERS_DIGITS + '_':
             key_str += self.current_char
             self.advance()
             
         key_str = key_str.lower()
         if key_str in Tokens.KEYWORDS:
             tok_type = Tokens.KEYWORD
-            return Token(tok_type, key_str, pos_start, self.pos), None
+            return Token(tok_type, key_str, pos_start, self.pos)
         elif key_str in Tokens.BOOLEANS:
             tok_type = Tokens.BOOL
             if key_str == 'true':
-                return Token(tok_type, True, pos_start, self.pos), None
+                return Token(tok_type, True, pos_start, self.pos)
             elif key_str == 'false':
-                return Token(tok_type, False, pos_start, self.pos), None
-        
-        return None, IllegalCharacterError(pos_start, self.pos, "'" + key_str + "'")
+                return Token(tok_type, False, pos_start, self.pos)
+
+        return Token(Tokens.IDENTIFIER, key_str, pos_start, self.pos)
         
     
     #deprecated

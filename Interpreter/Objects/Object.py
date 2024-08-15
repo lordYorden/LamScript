@@ -1,4 +1,4 @@
-from Lexer.myerror import TypeError
+from Error.RuntimeError import TypeError
 
 class Object: 
     def __init__(self, value):

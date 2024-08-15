@@ -1,6 +1,7 @@
-from Parser.node import NumberNode, BinOpNode, UnaryOpNode, BooleanNode, whileNode
-from Lexer.mytoken import Tokens, Token
-from Lexer.myerror import InvalidSyntaxError
+from Parser.node import NumberNode, BinOpNode, UnaryOpNode, BooleanNode, whileNode ,SymbolAcsessNode
+from Lexer.Tokens import Tokens, Token
+from Error.Error import InvalidSyntaxError
+from Parser.ParseResult import ParseResult
 
 class Parser:
     parenthesis = (Tokens.LPAREN, Tokens.RPAREN)
@@ -82,6 +83,10 @@ class Parser:
             res.register_advancement()
             self.advance()
             return res.success(NumberNode(tok))
+        elif tok.type == Tokens.IDENTIFIER:
+            res.register_advancement()
+            self.advance()
+            return res.success(SymbolAcsessNode(tok))
         elif tok.type == Tokens.LPAREN:
             return self.parentized_expr()
         elif tok.matches(Tokens.KEYWORD, Tokens.WHILE):
@@ -149,27 +154,27 @@ class Parser:
         return res.success(left)
     
     
-class ParseResult:
+# class ParseResult:
     
-    def __init__(self):
-        self.error = None
-        self.node = None
-        self.advance_count = 0
+#     def __init__(self):
+#         self.error = None
+#         self.node = None
+#         self.advance_count = 0
     
-    def register(self, res):
-        self.advance_count += res.advance_count
-        if res.error: self.error = res.error
-        return res.node
+#     def register(self, res):
+#         self.advance_count += res.advance_count
+#         if res.error: self.error = res.error
+#         return res.node
     
-    def register_advancement(self):
-        self.advance_count += 1
-        return self
+#     def register_advancement(self):
+#         self.advance_count += 1
+#         return self
     
-    def success(self, node):
-        self.node = node
-        return self
+#     def success(self, node):
+#         self.node = node
+#         return self
     
-    def failure(self, error):
-        if not self.error or self.advance_count == 0:
-            self.error = error
-        return self
+#     def failure(self, error):
+#         if not self.error or self.advance_count == 0:
+#             self.error = error
+#         return self
