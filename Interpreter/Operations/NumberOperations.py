@@ -96,7 +96,7 @@ class greater(NumberOperation):
         self.set_op_func(self.gt)
     
     def gt(self, left, right):
-        return Boolean(left.value > right.value), None
+        return Boolean.Boolean(left.value > right.value), None
     
 class less(NumberOperation):
     def __init__(self, op_token, left, right):
