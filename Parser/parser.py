@@ -75,52 +75,55 @@ class Parser:
     def atom(self):
         res = ParseResult()
         tok = self.current_token
-        if tok.type in (Tokens.INT):
+        if tok.type == Tokens.INT:
             res.register(self.advance())
             return res.success(NumberNode(tok))
         elif tok.type == Tokens.LPAREN:
-            res.register(self.advance())
-            expr = res.register(self.bool_expr())
+            return self.parentized_expr()
+        elif tok.matches(Tokens.KEYWORD, Tokens.WHILE):
+            #res.register(self.advance())
+            expr = res.register(self.while_expr())
             if res.error: return res
-            
-            if self.current_token.type == Tokens.RPAREN:
-                res.register(self.advance())
-                return res.success(expr)
-            else:
-                return res.failure(InvalidSyntaxError(tok.pos_start, self.current_token.pos_end, "Expected ')'"))
-            
-        elif tok.type == Tokens.KEYWORD and tok.value == Tokens.WHILE:
-            tok = self.current_token
-            
-            res.register(self.advance()) 
-            if self.current_token.type == Tokens.LPAREN:
-                tok = self.current_token
-                
-                res.register(self.advance()) 
-                condition = res.register(self.bool_expr())
-                if res.error: return res
-                
-                if self.current_token.type == Tokens.RPAREN:
-                    res.register(self.advance())
-                else:
-                    return res.failure(InvalidSyntaxError(tok.pos_start, self.current_token.pos_end, "Expected ')'"))
-            
-            if self.current_token.type == Tokens.LBRCE:
-                tok = self.current_token
-                
-                res.register(self.advance())
-                body = res.register(self.bool_expr())
-                if res.error: return res
-                
-                if self.current_token.type == Tokens.RBRCE:
-                    res.register(self.advance())
-                    return res.success(whileNode(condition, body))
-                else:
-                    return res.failure(InvalidSyntaxError(tok.pos_start, self.current_token.pos_end, "Expected '}'"))
-            else:
-                return res.failure(InvalidSyntaxError(tok.pos_start, self.current_token.pos_end, "Expected '{'"))
+            return res.success(expr)
             
         return res.failure(InvalidSyntaxError(tok.pos_start, self.current_token.pos_end, "Expected '( or int'"))
+    
+    def parentized_expr(self):
+        res = ParseResult()
+        tok = self.current_token
+        res.register(self.advance())
+        expr = res.register(self.bool_expr())
+        if res.error: return res
+        
+        if self.current_token.type == Tokens.RPAREN:
+            res.register(self.advance())
+            return res.success(expr)
+        else:
+            return res.failure(InvalidSyntaxError(tok.pos_start, self.current_token.pos_end, "Expected ')'"))
+         
+    def while_expr(self):
+        res = ParseResult()
+        tok = self.current_token
+            
+        res.register(self.advance()) 
+        if self.current_token.type == Tokens.LPAREN:
+            condition = res.register(self.parentized_expr())
+            if res.error: return res
+        
+        if self.current_token.type == Tokens.LBRCE:
+            tok = self.current_token
+            
+            res.register(self.advance())
+            body = res.register(self.bool_expr())
+            if res.error: return res
+            
+            if self.current_token.type == Tokens.RBRCE:
+                res.register(self.advance())
+                return res.success(whileNode(condition, body))
+            else:
+                return res.failure(InvalidSyntaxError(tok.pos_start, self.current_token.pos_end, "Expected '}'"))
+        else:
+            return res.failure(InvalidSyntaxError(tok.pos_start, self.current_token.pos_end, "Expected '{'"))
     
     def bin_op(self, func, ops):
         res = ParseResult()
