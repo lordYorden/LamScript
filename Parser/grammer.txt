@@ -25,7 +25,7 @@
 <non_zero_dig> := 1..9
 <high_order_math_op> := * | / | // | %
 <low_order_math_op> := + | -
-
+<keywords> := while
 <bool> := true | false
 <not> := !
 <low_order_bool_op> := && | ||
