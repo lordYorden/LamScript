@@ -24,7 +24,7 @@ class Parser:
     def parse(self):
         res = self.bool_expr()
         if not res.error and self.current_token.type != Tokens.EOF:
-            return res.failure(InvalidSyntaxError(self.current_token.pos_start, self.current_token.pos_end, "Expected '+', '-', '*', '/', '//' or '%'"))
+            return res.failure(InvalidSyntaxError(self.current_token.pos_start, self.current_token.pos_end, "Expected a different character"))
         return res
     
     def bool_expr(self):

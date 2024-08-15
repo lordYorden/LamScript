@@ -7,7 +7,7 @@ class Number(Object):
     bin_operations  = {Tokens.ADD: NumberOperations.add, 
                             Tokens.SUB: NumberOperations.sub,
                             Tokens.MUL: NumberOperations.mul,
-                            Tokens.DIV: NumberOperations.div,
+                            Tokens.DIV: NumberOperations.idiv,
                             Tokens.IDIV: NumberOperations.idiv,
                             Tokens.MOD: NumberOperations.mod,
                             Tokens.GREATER: NumberOperations.greater,
