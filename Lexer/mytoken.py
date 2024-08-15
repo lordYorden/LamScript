@@ -30,12 +30,15 @@ class Tokens:
     #boolean 
     TRUE = 'true'
     FALSE = 'false'
+    BOOLEANS = [TRUE,FALSE]
     #other
     DIGITS = '0123456789'
     LETTERS = string.ascii_letters
     ASSIGN = '='
     EOF = 'EOF'
     WHITESPACE = ' \t'
+    KEYWORD = 'KEYWORD'
+    KEYWORDS = ['while', 'def', 'return']
 
 class Token:
     def __init__(self, type, value=None, pos_start=None, pos_end=None):
