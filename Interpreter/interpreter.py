@@ -44,5 +44,21 @@ class Interpreter:
         if error: return res.failure(error)
         
         return res.success(object.set_pos(node.pos_start, node.pos_end))
+    
+    def visit_whileNode(self, node, context):
+        res = RuntimeResult()
+        while True:
+            condition_value = res.register(self.visit(node.condition_node, context))
+            if res.error: return None, res.error
+            
+            if not condition_value:
+                break
+            
+            value = res.register(self.visit(node.body_node, context))
+            #for debugging
+            print(value)
+            if res.error: return None, res.error
+        
+        return res.success(None)
         
         

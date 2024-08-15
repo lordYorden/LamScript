@@ -25,6 +25,11 @@ class Lexer:
                 self.advance()
             elif self.current_char in Tokens.DIGITS:
                 tokens.append(self.make_number())
+            elif self.current_char in Tokens.LETTERS:
+                tok, error = self.make_keyworrd()
+                if error:
+                    return [], error
+                tokens.append(tok)
             elif self.current_char == '+':
                 tokens.append(Token(Tokens.ADD, pos_start=self.pos))
                 self.advance()
@@ -52,12 +57,12 @@ class Lexer:
             elif self.current_char == '>':
                 tokens.append(self.make_equel(Tokens.GREATERE,Tokens.GREATER))
                 self.advance()
-            elif self.current_char == 't' or self.current_char == 'f':
-                tok, error = self.make_boolean()
-                if error:
-                    return [], error
-                tokens.append(tok)
-                self.advance()
+            # elif self.current_char == 't' or self.current_char == 'f':
+            #     tok, error = self.make_boolean()
+            #     if error:
+            #         return [], error
+            #     tokens.append(tok)
+            #     self.advance()
             elif self.current_char == '(':
                 tokens.append(Token(Tokens.LPAREN, pos_start=self.pos))
                 self.advance()
@@ -76,12 +81,12 @@ class Lexer:
                     return [], error
                 tokens.append(tok)
                 self.advance()
-            # elif self.current_char == '{':
-            #     tokens.append(Token(Tokens.LBRCE))
-            #     self.advance()
-            # elif self.current_char == '}':
-            #     tokens.append(Token(Tokens.RBRCE))
-            #     self.advance()
+            elif self.current_char == '{':
+                tokens.append(Token(Tokens.LBRCE, pos_start=self.pos))
+                self.advance()
+            elif self.current_char == '}':
+                tokens.append(Token(Tokens.RBRCE, pos_start=self.pos))
+                self.advance()
             else:
                 start_pos = self.pos.copy()
                 char = self.current_char
@@ -133,7 +138,29 @@ class Lexer:
         self.backtrack()
         return Token(alternative_token, pos_start=pos_start)
     
-    #possible implementation of boolean
+    def make_keyworrd(self):
+        key_str = ''
+        pos_start = self.pos.copy()
+
+        while self.current_char != None and self.current_char in Tokens.LETTERS:
+            key_str += self.current_char
+            self.advance()
+            
+        key_str = key_str.lower()
+        if key_str in Tokens.KEYWORDS:
+            tok_type = Tokens.KEYWORD
+            return Token(tok_type, key_str, pos_start, self.pos), None
+        elif key_str in Tokens.BOOLEANS:
+            tok_type = Tokens.BOOL
+            if key_str == 'true':
+                return Token(tok_type, True, pos_start, self.pos), None
+            elif key_str == 'false':
+                return Token(tok_type, False, pos_start, self.pos), None
+        
+        return None, IllegalCharacterError(pos_start, self.pos, "'" + key_str + "'")
+        
+    
+    #deprecated
     def make_boolean(self):
         bool_str = ''
         pos_start = self.pos.copy()

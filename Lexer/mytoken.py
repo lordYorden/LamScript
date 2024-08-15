@@ -30,12 +30,16 @@ class Tokens:
     #boolean 
     TRUE = 'true'
     FALSE = 'false'
+    BOOLEANS = [TRUE,FALSE]
     #other
     DIGITS = '0123456789'
     LETTERS = string.ascii_letters
     ASSIGN = '='
     EOF = 'EOF'
     WHITESPACE = ' \t'
+    WHILE = 'while'
+    KEYWORD = 'KEYWORD'
+    KEYWORDS = [WHILE, 'def', 'return']
 
 class Token:
     def __init__(self, type, value=None, pos_start=None, pos_end=None):
@@ -49,6 +53,9 @@ class Token:
         
         if pos_end:
             self.pos_end = pos_end.copy()
+            
+    def matches(self, type_, value):
+        return self.type == type_ and self.value == value
     
     def __repr__(self):
         if self.value:

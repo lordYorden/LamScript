@@ -13,7 +13,9 @@
 
 <math_factor> := <low_order_op> <math_expr> | <atom>
 
-<atom> :=  <int> |  ( <bool_expr> )
+<atom> :=  <int> |  ( <bool_expr> ) | <while_expr>
+
+<while_expr> := while (<bool_expr>) { <bool_expr> }
 
 
 (true == true)
@@ -23,7 +25,7 @@
 <non_zero_dig> := 1..9
 <high_order_math_op> := * | / | // | %
 <low_order_math_op> := + | -
-
+<keywords> := while
 <bool> := true | false
 <not> := !
 <low_order_bool_op> := && | ||
