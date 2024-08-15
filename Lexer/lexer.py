@@ -38,7 +38,7 @@ class Lexer:
                 tokens.append(self.make_whole_div())
                 self.advance()
             elif self.current_char == '%':
-                tokens.append(Tokens.MOD, pos_start=self.pos)
+                tokens.append(Token(Tokens.MOD, pos_start=self.pos))
                 self.advance()
             elif self.current_char == '=':
                 tokens.append(self.make_equel(Tokens.EQUEL,Tokens.ASSIGN))

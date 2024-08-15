@@ -1,5 +1,7 @@
 from Lexer.lexer import Lexer
 from Parser.parser import Parser
+from Interpreter.interpreter import Interpreter
+from Interpreter.Context import Context
 
 def main():
     while True:
@@ -23,8 +25,16 @@ def run(fn, text):
     #parse tree
     parser = Parser(tokens)
     ast = parser.parse()
+    if ast.error:
+        return None, ast.error
     
-    return ast.node, ast.error
+    print(ast.node)
+    
+    interpreter = Interpreter()
+    context = Context('<program>')
+    result = interpreter.visit(ast.node, context)
+    
+    return result.value, result.error
 
 if __name__ == '__main__':
     main()
