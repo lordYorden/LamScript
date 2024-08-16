@@ -38,9 +38,11 @@ class Tokens:
     ASSIGN = '='
     EOF = 'EOF'
     WHILE = 'while'
+    DEF = 'def'
+    LITE = 'lite'
     KEYWORD = 'KEYWORD'
     IDENTIFIER = 'IDENTIFIER'
-    KEYWORDS = [WHILE, 'def', 'return']
+    KEYWORDS = [WHILE, DEF, LITE, 'return']
     COMMA = ','
 
 class Token:
