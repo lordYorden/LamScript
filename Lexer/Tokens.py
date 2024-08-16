@@ -37,11 +37,11 @@ class Tokens:
     LETTERS_DIGITS = LETTERS + DIGITS
     ASSIGN = '='
     EOF = 'EOF'
-    WHITESPACE = ' \t'
     WHILE = 'while'
     KEYWORD = 'KEYWORD'
     IDENTIFIER = 'IDENTIFIER'
     KEYWORDS = [WHILE, 'def', 'return']
+    COMMA = ','
 
 class Token:
     def __init__(self, type, value=None, pos_start=None, pos_end=None):

@@ -75,6 +75,15 @@ class Parser:
             atom = res.register(self.atom())
             if res.error: return res
             return res.success(atom)
+       
+    def identifer(self):
+        res = ParseResult()
+        tok = self.current_token
+        if tok.type == Tokens.IDENTIFIER:
+            res.register_advancement()
+            self.advance()
+            return res.success(SymbolAcsessNode(tok))
+        return res.failure(InvalidSyntaxError(tok.pos_start, self.current_token.pos_end, "Expected 'IDENTIFIER'")) 
         
     def atom(self):
         res = ParseResult()
@@ -84,9 +93,9 @@ class Parser:
             self.advance()
             return res.success(NumberNode(tok))
         elif tok.type == Tokens.IDENTIFIER:
-            res.register_advancement()
-            self.advance()
-            return res.success(SymbolAcsessNode(tok))
+            id = res.register(self.identifer())
+            if res.error: return res
+            return res.success(id)
         elif tok.type == Tokens.LPAREN:
             return self.parentized_expr()
         elif tok.matches(Tokens.KEYWORD, Tokens.WHILE):
@@ -153,6 +162,61 @@ class Parser:
             left = BinOpNode(left, op_tok, right)
         return res.success(left)
     
+    def parameters(self):
+        res = ParseResult()
+        res.register_advancement()
+        self.advance()
+        more_then_one = False
+        parameters = []
+        
+        id = self.identifer()
+        if id.error: return id
+        parameters.append(id)
+        
+        if self.current_token.type == Tokens.COMMA:
+            more_then_one = True
+            res.register_advancement()
+            self.advance()
+            
+        while more_then_one:
+            id = self.identifer()
+            if id.error: return id
+            parameters.append(id)
+            
+            if self.current_token.type != Tokens.COMMA:
+                more_then_one = False
+                res.register_advancement()
+                self.advance()
+                
+        return res.success(parameters)
+            
+    def arguments(self):
+        res = ParseResult()
+        res.register_advancement()
+        self.advance()
+        more_then_one = False
+        arguments = []
+        
+        arg = res.register(self.bool_expr())
+        if arg.error: return arg
+        arguments.append(arg)
+        
+        if self.current_token.type == Tokens.COMMA:
+            more_then_one = True
+            res.register_advancement()
+            self.advance()
+            
+        while more_then_one:
+            arg = res.register(self.bool_expr())
+            if arg.error: return arg
+            arguments.append(arg)
+            
+            if self.current_token.type != Tokens.COMMA:
+                more_then_one = False
+                res.register_advancement()
+                self.advance()
+                
+        return res.success(arguments)
     
 # class ParseResult:
     

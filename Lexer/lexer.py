@@ -55,12 +55,9 @@ class Lexer:
             elif self.current_char == '>':
                 tokens.append(self.make_equel(Tokens.GREATERE,Tokens.GREATER))
                 self.advance()
-            # elif self.current_char == 't' or self.current_char == 'f':
-            #     tok, error = self.make_boolean()
-            #     if error:
-            #         return [], error
-            #     tokens.append(tok)
-            #     self.advance()
+            elif self.current_char == ',':
+                tokens.append(Token(Tokens.COMMA, pos_start=self.pos))
+                self.advance()
             elif self.current_char == '(':
                 tokens.append(Token(Tokens.LPAREN, pos_start=self.pos))
                 self.advance()

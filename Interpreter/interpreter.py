@@ -52,7 +52,7 @@ class Interpreter:
         
         if not value:
             return res.failure(RunTimeError(node.pos_start, node.pos_end, f"'{sym_name}' is not defined", context))
-        return res.success(value)
+        return res.success(value.set_pos(node.pos_start, node.pos_end).set_context(context))
     
     def visit_whileNode(self, node, context):
         res = RuntimeResult()
@@ -64,9 +64,9 @@ class Interpreter:
                 break
             
             value = res.register(self.visit(node.body_node, context))
+            if res.error: return None, res.error
             #for debugging
             print(value)
-            if res.error: return None, res.error
         
         return res.success(None)
         
