@@ -169,7 +169,7 @@ class Parser:
         more_then_one = False
         parameters = []
         
-        id = self.identifer()
+        id = res.register(self.identifer())
         if id.error: return id
         parameters.append(id)
         
@@ -179,7 +179,7 @@ class Parser:
             self.advance()
             
         while more_then_one:
-            id = self.identifer()
+            id = res.register(self.identifer())
             if id.error: return id
             parameters.append(id)
             
