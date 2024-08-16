@@ -11,7 +11,7 @@
 
 <math_term> := <math_factor> (<high_order_math_op> <math_factor>)* 
 
-<math_factor> := <low_order_op> <math_expr> | <atom>
+<math_factor> := <low_order_op> <math_expr> | <call>
 
 <call> := <atom> ( <arguments>? )?
 
