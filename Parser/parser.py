@@ -1,4 +1,4 @@
-from Parser.node import NumberNode, BinOpNode, UnaryOpNode, BooleanNode, whileNode ,SymbolAcsessNode , funcDefNode , funcCallNode
+from Parser.node import NumberNode, BinOpNode, UnaryOpNode, BooleanNode, whileNode ,SymbolAcsessNode , FuncDefNode , FuncCallNode
 from Lexer.Tokens import Tokens, Token
 from Error.Error import InvalidSyntaxError
 from Parser.ParseResult import ParseResult
@@ -257,7 +257,7 @@ class Parser:
                        if self.current_token.type == Tokens.RBRCE:
                             res.register_advancement()
                             self.advance()
-                            return res.success(funcDefNode(id, params, body))
+                            return res.success(FuncDefNode(id, params, body))
                        else:
                             return res.failure(InvalidSyntaxError(tok.pos_start, self.current_token.pos_end, "Expected '}'"))
                     else:
@@ -284,7 +284,7 @@ class Parser:
 
                         body = res.register(self.bool_expr())
                         if res.error: return res
-                        return res.success(funcDefNode(None, params, body))
+                        return res.success(FuncDefNode(None, params, body))
                     else:
                         res.failure(InvalidSyntaxError(tok.pos_start, self.current_token.pos_end, "Expected ')'"))  
             else:
@@ -302,7 +302,7 @@ class Parser:
             if self.current_token.type == Tokens.RPAREN:
                 self.advance()
                 res.register_advancement()
-                return res.success(funcCallNode(atom, []))
+                return res.success(FuncCallNode(atom, []))
             else:
                 tok = self.current_token
                 # res.register_advancement()
@@ -312,7 +312,7 @@ class Parser:
                 if self.current_token.type == Tokens.RPAREN:
                     self.advance()
                     res.register_advancement()
-                    return res.success(funcCallNode(atom, arg))
+                    return res.success(FuncCallNode(atom, arg))
                 else:
                     return res.failure(InvalidSyntaxError(tok.pos_start, self.current_token.pos_end, "Expected ')'"))
         return res.success(atom)

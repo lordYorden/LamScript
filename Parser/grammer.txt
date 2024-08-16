@@ -19,7 +19,7 @@
 
 <while_expr> := while (<bool_expr>) { <bool_expr> }
 
-<func_def> := def <identifier> ( <params>? ) { <bool_expr> }
+<func_def> := def <identifier> ( <params>? ) { return? <bool_expr> }
             | lite ( <params>? ) <bool_expr>
 
 <params> := <identifier> (, <identifier>)*
