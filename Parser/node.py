@@ -84,12 +84,13 @@ class FuncDefNode:
             self.pos_start = self.identifier_token.pos_start
         elif len(self.arg_nodes) > 0:
             self.pos_start = self.arg_nodes[0].pos_start
-        elif len(self.body_nodes) > 0:
+        
+        if len(self.body_nodes) > 0:
             self.pos_start = self.body_nodes[0].pos_start
             self.pos_end = self.body_nodes[len(self.body_nodes) - 1].pos_end        
 
     def __repr__(self):
-        return f'{self.identifier_token}({self.arg_nodes}) {Tokens.LBRCE} {self.body_node} {Tokens.RBRCE}'
+        return f'{self.identifier_token}({self.arg_nodes}) {Tokens.LBRCE} {self.body_nodes} {Tokens.RBRCE}'
     
 class FuncCallNode:
     def __init__(self, node_to_call, arg_nodes):

@@ -13,8 +13,8 @@ def main():
         result,error = run('<stdin>',command)
         if error:
             print(error.as_string())
-        else:
-            print(result)
+        elif result != Object.none:
+            print(result) 
             
 
 global_symbol_table = SymbolTable()

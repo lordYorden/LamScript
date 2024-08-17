@@ -19,3 +19,5 @@ class Boolean(Object):
         
     def find_unary_op(self, op_token):
         return self.find_op(op_token, self.unary_operations)
+    
+Boolean.true = Boolean(True)

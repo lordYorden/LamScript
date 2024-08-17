@@ -5,6 +5,7 @@ from Interpreter.RuntimeResult import RuntimeResult
 from Error.RuntimeError import RunTimeError
 from Interpreter.Objects.Function import Function
 from Interpreter.Context import Context
+from Lexer.Tokens import Tokens
 
 class Interpreter:
     def visit(self, node, context):
@@ -28,6 +29,14 @@ class Interpreter:
         res = RuntimeResult()
         left = res.register(self.visit(node.left_node, context))
         if res.error: return None, res.error
+        
+        if node.op_token.type == Tokens.OR:
+            if isinstance(left,Boolean) and left.value == True:
+                return res.success(left)
+        if node.op_token.type == Tokens.AND:
+            if isinstance(left,Boolean) and left.value == False:
+                return res.success(left)
+                
         
         right = res.register(self.visit(node.right_node, context))
         if res.error: return None, res.error
@@ -75,9 +84,9 @@ class Interpreter:
         res = RuntimeResult()
         function_name = node.identifier_token.value if node.identifier_token else None
         arg_name = [arg_name.get_token().value for arg_name in node.arg_nodes]
-        body_node = node.body_node
+        body_nodes = node.body_nodes
         
-        function_value = Function(function_name, body_node, arg_name).set_context(context).set_pos(node.pos_start, node.pos_end)
+        function_value = Function(function_name, body_nodes, arg_name).set_context(context).set_pos(node.pos_start, node.pos_end)
         
         if function_name:
             context.symbol_table.set(function_name, function_value)
