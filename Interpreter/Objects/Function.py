@@ -1,12 +1,13 @@
 from Interpreter.Objects.Object import Object
-from Interpreter.Context import Context
+# from Interpreter.Context import Context
+from Interpreter.Objects.BaseFunction import BaseFunction
 import Interpreter.interpreter as Interpreter
-from Error.RuntimeError import RunTimeError
+# from Error.RuntimeError import RunTimeError
 
-class Function(Object):
+class Function(BaseFunction):
     def __init__(self, name, body_node, arg_name):
         super().__init__(name)
-        self.name = name
+        self.name = name or "<anonymous>"
         self.body_node = body_node
         self.arg_name = arg_name
         
@@ -14,22 +15,12 @@ class Function(Object):
         res = Interpreter.RuntimeResult()
         interpreter = Interpreter.Interpreter()
         
-        if len(args) > len(self.arg_name):
-            return res.failure(RunTimeError(self.pos_start, self.pos_end, f"{len(args) - len(self.arg_name)} too many args passed into '{self.name}'", self.context))
-        
-        if len(args) < len(self.arg_name):
-            return res.failure(RunTimeError(self.pos_start, self.pos_end, f"{len(self.arg_name) - len(args)} too few args passed into '{self.name}'", self.context))
-        
-        for i in range(len(args)):
-            arg_name = self.arg_name[i]
-            arg_value = args[i]
-            arg_value.set_context(self.context).set_pos(self.pos_start, self.pos_end)
-            self.context.symbol_table.set(arg_name, arg_value)
-        
-        res = interpreter.visit(self.body_node, self.context)
+        res.register(self.check_and_populate_args(self.arg_name, args, self.context))
         if res.error: return res
         
-        return res.success(res.value)
+        return_value = res.register(interpreter.visit(self.body_node, self.context))
+        if res.error: return res
+        return res.success(return_value)
     
     def copy(self):
         copy = Function(self.name, self.body_node, self.arg_name)
