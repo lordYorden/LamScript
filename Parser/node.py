@@ -75,19 +75,18 @@ class SymbolAcsessNode:
         return f'{self.identifier_token}'
     
 class FuncDefNode:
-    def __init__(self, identifier_node, arg_nodes, body_node):
+    def __init__(self, identifier_node, arg_nodes, body_nodes):
         self.identifier_token = identifier_node.identifier_token if identifier_node else None
         self.arg_nodes = arg_nodes
-        self.body_node = body_node
+        self.body_nodes = body_nodes
         
         if self.identifier_token:
             self.pos_start = self.identifier_token.pos_start
         elif len(self.arg_nodes) > 0:
             self.pos_start = self.arg_nodes[0].pos_start
-        else:
-            self.pos_start = self.body_node.pos_start
-        
-        self.pos_end = self.body_node.pos_end
+        elif len(self.body_nodes) > 0:
+            self.pos_start = self.body_nodes[0].pos_start
+            self.pos_end = self.body_nodes[len(self.body_nodes) - 1].pos_end        
 
     def __repr__(self):
         return f'{self.identifier_token}({self.arg_nodes}) {Tokens.LBRCE} {self.body_node} {Tokens.RBRCE}'

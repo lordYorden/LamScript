@@ -256,17 +256,26 @@ class Parser:
                     res.register_advancement()
 
                     if self.current_token.type == Tokens.LBRCE:
-                       tok = self.current_token
-                       res.register_advancement()
-                       self.advance()
-                       body = res.register(self.bool_expr())
-                       if res.error: return res
-
-                       if self.current_token.type == Tokens.RBRCE:
+                        tok = self.current_token
+                        res.register_advancement()
+                        self.advance()
+                       
+                        body_nodes = []
+                        if self.current_token.type == Tokens.NEWLINE:
                             res.register_advancement()
                             self.advance()
-                            return res.success(FuncDefNode(id, params, body))
-                       else:
+                            body_nodes =  res.register(self.staments())
+                            if res.error: return res
+                        else:
+                            expr = res.register(self.bool_expr())
+                            if res.error: return res
+                            body_nodes.append(expr)
+
+                        if self.current_token.type == Tokens.RBRCE:
+                            res.register_advancement()
+                            self.advance()
+                            return res.success(FuncDefNode(id, params, body_nodes))
+                        else:
                             return res.failure(InvalidSyntaxError(tok.pos_start, self.current_token.pos_end, "Expected '}'"))
                     else:
                         return res.failure(InvalidSyntaxError(tok.pos_start, self.current_token.pos_end, "Expected '{'"))
