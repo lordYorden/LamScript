@@ -16,7 +16,7 @@ def main():
             
 
 global_symbol_table = SymbolTable()
-global_symbol_table.set("null", Number(0))
+global_symbol_table.set("null", Number.null)
 global_symbol_table.set("x", Number(10)) #for testing
 
 def run(fn, text):
@@ -26,7 +26,7 @@ def run(fn, text):
         return None, error
     
     #print("finshed lexing")
-    print(tokens)
+    #print(tokens)
     
     #parse tree
     parser = Parser(tokens)
@@ -34,7 +34,7 @@ def run(fn, text):
     if ast.error:
         return None, ast.error
     
-    print(ast.node)
+    #print(ast.node)
 
     interpreter = Interpreter()
     context = Context('<program>')

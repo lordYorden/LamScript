@@ -102,6 +102,6 @@ class Interpreter:
         return_value = res.register(value_to_call.execute(args))
         if res.error: return res
         
-        return res.success(return_value)
+        return res.success(return_value.set_pos(node.pos_start, node.pos_end).set_context(new_context))
         
         
