@@ -44,6 +44,7 @@ class Tokens:
     IDENTIFIER = 'IDENTIFIER'
     KEYWORDS = [WHILE, DEF, LITE, 'return']
     COMMA = ','
+    NEWLINE = 'NEWLINE'
 
 class Token:
     def __init__(self, type, value=None, pos_start=None, pos_end=None):
