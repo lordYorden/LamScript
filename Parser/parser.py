@@ -263,9 +263,9 @@ class Parser:
                     else:
                         return res.failure(InvalidSyntaxError(tok.pos_start, self.current_token.pos_end, "Expected '{'"))
                 else:
-                    res.failure(InvalidSyntaxError(tok.pos_start, self.current_token.pos_end, "Expected ')'"))
+                    return res.failure(InvalidSyntaxError(tok.pos_start, self.current_token.pos_end, "Expected ')'"))
             else:
-                res.failure(InvalidSyntaxError(tok.pos_start, self.current_token.pos_end, "Expected '('"))
+                return res.failure(InvalidSyntaxError(tok.pos_start, self.current_token.pos_end, "Expected '('"))
 
         elif tok.matches(Tokens.KEYWORD , Tokens.LITE): 
             res.register_advancement()
@@ -286,9 +286,9 @@ class Parser:
                         if res.error: return res
                         return res.success(FuncDefNode(None, params, body))
                     else:
-                        res.failure(InvalidSyntaxError(tok.pos_start, self.current_token.pos_end, "Expected ')'"))  
+                        return res.failure(InvalidSyntaxError(tok.pos_start, self.current_token.pos_end, "Expected ')'"))  
             else:
-                res.failure(InvalidSyntaxError(tok.pos_start, self.current_token.pos_end, "Expected '('"))
+                return res.failure(InvalidSyntaxError(tok.pos_start, self.current_token.pos_end, "Expected '('"))
         else:
             return res.failure(InvalidSyntaxError(tok.pos_start, self.current_token.pos_end, "Expected 'def' or 'lite'"))
                     
