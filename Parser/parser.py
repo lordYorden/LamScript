@@ -231,7 +231,7 @@ class Parser:
                 self.advance()
                 
         return res.success(arguments)
-    
+  
 
     def function_def(self):
         res = ParseResult()
@@ -327,34 +327,29 @@ class Parser:
             
     def staments(self):
         res = ParseResult()
-        more_then_one = True
-        expresions = []
-        # expr = res.register(self.bool_expr())
-        # if res.error: return res
-        # expresions.append(expr)
-        # res.register_advancement()
-        # self.advance()
-        # if self.current_token.type == Tokens.NEWLINE:
-        #     more_then_one = True
-        #     res.register_advancement()
-        #     self.advance()
-        while more_then_one:
-            if self.current_token.type == Tokens.NEWLINE:
-                res.register_advancement()
-                self.advance()
-            else:
-                more_then_one = False
-            expr = res.register(self.bool_expr())
-            if res.error: return res
-            expresions.append(expr)
-
-        if self.current_token.type == Tokens.NEWLINE:
-                res.register_advancement()
-                self.advance()
-        else:
-            return res.failure(InvalidSyntaxError(self.current_token.pos_start, self.current_token.pos_end, "Expected NEWLINE"))
+        staments = []
+        pos_start = self.current_token.pos_start.copy()
         
-        return res.success(expresions)
+        while self.current_token.type == Tokens.NEWLINE:
+            res.register_advancement()
+            self.advance()
+            
+        stament = res.register(self.bool_expr())
+        if res.error: return res
+        staments.append(stament)
+        
+        while self.current_token.type == Tokens.NEWLINE:
+            res.register_advancement()
+            self.advance()
+            
+            if self.current_token.type == Tokens.RBRCE:
+                break
+            
+            stament = res.register(self.bool_expr())
+            if res.error: return res
+            staments.append(stament)
+            
+        return res.success(staments)
 
 
 

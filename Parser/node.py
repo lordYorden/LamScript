@@ -47,12 +47,17 @@ class UnaryOpNode:
         return f'({self.op_token}, {self.node})'
     
 class whileNode:
-    def __init__(self, condition_node, body_node):
+    def __init__(self, condition_node, body_nodes):
         self.condition_node = condition_node
-        self.body_node = body_node
+        self.body_nodes = body_nodes
         
         self.pos_start = self.condition_node.pos_start
-        self.pos_end = self.body_node.pos_end
+        
+        if len(self.body_nodes) > 0:
+            self.pos_start = self.body_nodes[0].pos_start
+            self.pos_end = self.body_nodes[len(self.body_nodes) - 1].pos_end
+        else:
+            self.pos_end = self.condition_node.pos_end
 
     def __repr__(self):
         return f'while ({self.condition_node}) {Tokens.LBRCE} {self.body_node} {Tokens.RBRCE}'

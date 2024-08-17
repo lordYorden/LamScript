@@ -1,5 +1,5 @@
 
-<staments> := <bool_expr> (NEWLINE <bool_expr>)* NEWLINE
+<staments> := NEWLINE* <bool_expr> (NEWLINE+ <bool_expr>)* NEWLINE*
 
 <bool_expr> := <bool_term> (<low_order_bool_op> <bool_term>)*
 
@@ -23,12 +23,17 @@
               | while (<bool_expr>) { NEWLINE <staments> }
 
 while(true){
+
+
     print(3)
     print(3)
+
+
+
 }
 
 <func_def> := def <identifier> ( <params>? ) { <bool_expr> }
-            | def <identifier> ( <params>? ) { NEWLINE <staments> }
+            | def <identifier> ( <params>? ) { <staments> }
             | lite ( <params>? ) <bool_expr>
 
 <params> := <identifier> (, <identifier>)*
