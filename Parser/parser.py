@@ -137,16 +137,24 @@ class Parser:
         
         if self.current_token.type == Tokens.LBRCE:
             tok = self.current_token
-            
             res.register_advancement()
             self.advance()
-            body = res.register(self.bool_expr())
-            if res.error: return res
+
+            body_nodes = []
+            if self.current_token.type == Tokens.NEWLINE:
+                res.register_advancement()
+                self.advance()
+                body_nodes =  res.register(self.staments())
+                if res.error: return res
+            else:
+                expr = res.register(self.bool_expr())
+                if res.error: return res
+                body_nodes.append(expr)
             
             if self.current_token.type == Tokens.RBRCE:
                 res.register_advancement()
                 self.advance()
-                return res.success(whileNode(condition, body))
+                return res.success(whileNode(condition, body_nodes))
             else:
                 return res.failure(InvalidSyntaxError(tok.pos_start, self.current_token.pos_end, "Expected '}'"))
         else:
@@ -317,6 +325,37 @@ class Parser:
                     return res.failure(InvalidSyntaxError(tok.pos_start, self.current_token.pos_end, "Expected ')'"))
         return res.success(atom)
             
+    def staments(self):
+        res = ParseResult()
+        more_then_one = True
+        expresions = []
+        # expr = res.register(self.bool_expr())
+        # if res.error: return res
+        # expresions.append(expr)
+        # res.register_advancement()
+        # self.advance()
+        # if self.current_token.type == Tokens.NEWLINE:
+        #     more_then_one = True
+        #     res.register_advancement()
+        #     self.advance()
+        while more_then_one:
+            if self.current_token.type == Tokens.NEWLINE:
+                res.register_advancement()
+                self.advance()
+            else:
+                more_then_one = False
+            expr = res.register(self.bool_expr())
+            if res.error: return res
+            expresions.append(expr)
+
+        if self.current_token.type == Tokens.NEWLINE:
+                res.register_advancement()
+                self.advance()
+        else:
+            return res.failure(InvalidSyntaxError(self.current_token.pos_start, self.current_token.pos_end, "Expected NEWLINE"))
+        
+        return res.success(expresions)
+
 
 
 # class ParseResult:
