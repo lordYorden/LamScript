@@ -238,7 +238,7 @@ class Parser:
                 res.register_advancement()
                 self.advance()
 
-                params = None
+                params = []
                 if  self.current_token.type == Tokens.IDENTIFIER:
                     params = res.register(self.parameters())
                     if res.error: return res
