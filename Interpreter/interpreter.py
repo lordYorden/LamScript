@@ -65,10 +65,9 @@ class Interpreter:
             if not condition_value:
                 break
             
-            value = res.register(self.visit(node.body_node, context))
-            if res.error: return res
-            #for debugging
-            #print(value)
+            for n in node.body_nodes:
+                value = res.register(self.visit(n, context))
+                if res.error: res
         
         return res.success(Object.none)
     
