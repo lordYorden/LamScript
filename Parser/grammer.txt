@@ -11,21 +11,27 @@
 
 <math_term> := <math_factor> (<high_order_math_op> <math_factor>)* 
 
-<math_factor> := <low_order_op> <math_expr> | <atom>
+<math_factor> := <low_order_op> <math_expr> | <call>
 
-<atom> :=  <int> |  ( <bool_expr> ) | <while_expr>
+<call> := <atom> ( <arguments>? )?
+
+<atom> :=  <int> | <identifier> |  ( <bool_expr> ) | <while_expr> | <func_def>
 
 <while_expr> := while (<bool_expr>) { <bool_expr> }
 
+<func_def> := def <identifier> ( <params>? ) { return? <bool_expr> }
+            | lite ( <params>? ) <bool_expr>
 
-(true == true)
-(3+2)/5
+<params> := <identifier> (, <identifier>)*
+<argument> := <expr> (, <expr>)*
 
 <int> :=  <non_zero_dig> <int> | <non_zero_dig> | 0
 <non_zero_dig> := 1..9
 <high_order_math_op> := * | / | // | %
 <low_order_math_op> := + | -
-<keywords> := while
+
+<keywords> := while | lite
+
 <bool> := true | false
 <not> := !
 <low_order_bool_op> := && | ||

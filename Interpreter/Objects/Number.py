@@ -1,8 +1,7 @@
 from Interpreter.Objects.Object import Object
 import Interpreter.Operations.NumberOperations as NumberOperations
-from Lexer.mytoken import Tokens
-from Lexer.myerror import TypeError
-
+from Lexer.Tokens import Tokens
+from Error.RuntimeError import TypeError
 class Number(Object):
     bin_operations  = {Tokens.ADD: NumberOperations.add, 
                             Tokens.SUB: NumberOperations.sub,
@@ -46,3 +45,6 @@ class Number(Object):
         
     def __repr__(self):
         return f'{self.value}'
+    
+
+Number.null = Number(0)

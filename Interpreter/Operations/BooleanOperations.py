@@ -1,6 +1,6 @@
 from Interpreter.Operations.Operation import UnaryOperation, BinaryOperation
 import Interpreter.Objects.Boolean as Boolean
-from Lexer.myerror import TypeError
+from Error.RuntimeError import TypeError
 
 class BooleanOperation(BinaryOperation):
     def __init__(self, op_token, left, right):

@@ -1,6 +1,7 @@
-from Parser.node import NumberNode, BinOpNode, UnaryOpNode, BooleanNode, whileNode
-from Lexer.mytoken import Tokens, Token
-from Lexer.myerror import InvalidSyntaxError
+from Parser.node import NumberNode, BinOpNode, UnaryOpNode, BooleanNode, whileNode ,SymbolAcsessNode , FuncDefNode , FuncCallNode
+from Lexer.Tokens import Tokens, Token
+from Error.Error import InvalidSyntaxError
+from Parser.ParseResult import ParseResult
 
 class Parser:
     parenthesis = (Tokens.LPAREN, Tokens.RPAREN)
@@ -71,9 +72,18 @@ class Parser:
             if res.error: return res
             return res.success(UnaryOpNode(tok, factor))
         else:
-            atom = res.register(self.atom())
+            call = res.register(self.call())
             if res.error: return res
-            return res.success(atom)
+            return res.success(call)
+       
+    def identifer(self):
+        res = ParseResult()
+        tok = self.current_token
+        if tok.type == Tokens.IDENTIFIER:
+            res.register_advancement()
+            self.advance()
+            return res.success(SymbolAcsessNode(tok))
+        return res.failure(InvalidSyntaxError(tok.pos_start, self.current_token.pos_end, "Expected 'IDENTIFIER'")) 
         
     def atom(self):
         res = ParseResult()
@@ -82,6 +92,10 @@ class Parser:
             res.register_advancement()
             self.advance()
             return res.success(NumberNode(tok))
+        elif tok.type == Tokens.IDENTIFIER:
+            id = res.register(self.identifer())
+            if res.error: return res
+            return res.success(id)
         elif tok.type == Tokens.LPAREN:
             return self.parentized_expr()
         elif tok.matches(Tokens.KEYWORD, Tokens.WHILE):
@@ -89,8 +103,12 @@ class Parser:
             expr = res.register(self.while_expr())
             if res.error: return res
             return res.success(expr)
+        elif tok.matches(Tokens.KEYWORD, Tokens.DEF) or tok.matches(Tokens.KEYWORD, Tokens.LITE):
+            expr = res.register(self.function_def())
+            if res.error: return res
+            return res.success(expr)
             
-        return res.failure(InvalidSyntaxError(tok.pos_start, self.current_token.pos_end, "Expected '(, int, or while'"))
+        return res.failure(InvalidSyntaxError(tok.pos_start, self.current_token.pos_end, "Expected '(, int, or while, def or lite'"))
     
     def parentized_expr(self):
         res = ParseResult()
@@ -148,28 +166,180 @@ class Parser:
             left = BinOpNode(left, op_tok, right)
         return res.success(left)
     
+    def parameters(self):
+        res = ParseResult()
+        # res.register_advancement()
+        # self.advance()
+        more_then_one = False
+        parameters = []
+        
+        id = res.register(self.identifer())
+        if res.error: return res
+        parameters.append(id)
+        
+        if self.current_token.type == Tokens.COMMA:
+            more_then_one = True
+            res.register_advancement()
+            self.advance()
+            
+        while more_then_one:
+            id = res.register(self.identifer())
+            if res.error: return res
+            parameters.append(id)
+            
+            if self.current_token.type != Tokens.COMMA:
+                more_then_one = False
+            else:
+                res.register_advancement()
+                self.advance()
+                
+        return res.success(parameters)
+            
+    def arguments(self):
+        res = ParseResult()
+        # res.register_advancement()
+        # self.advance()
+        more_then_one = False
+        arguments = []
+        
+        arg = res.register(self.bool_expr())
+        if res.error: return res
+        arguments.append(arg)
+        
+        if self.current_token.type == Tokens.COMMA:
+            more_then_one = True
+            res.register_advancement()
+            self.advance()
+            
+        while more_then_one:
+            arg = res.register(self.bool_expr())
+            if res.error: return res
+            arguments.append(arg)
+            
+            if self.current_token.type != Tokens.COMMA:
+                more_then_one = False
+            else:
+                res.register_advancement()
+                self.advance()
+                
+        return res.success(arguments)
     
-class ParseResult:
+
+    def function_def(self):
+        res = ParseResult()
+        tok = self.current_token
+        if tok.matches(Tokens.KEYWORD , Tokens.DEF):
+            res.register_advancement()
+            self.advance()
+            id = res.register(self.identifer())
+            if res.error: return res
+            if self.current_token.type == Tokens.LPAREN:
+                tok = self.current_token
+                res.register_advancement()
+                self.advance()
+
+                params = None
+                if  self.current_token.type == Tokens.IDENTIFIER:
+                    params = res.register(self.parameters())
+                    if res.error: return res
+
+                if self.current_token.type == Tokens.RPAREN:
+                    self.advance()
+                    res.register_advancement()
+
+                    if self.current_token.type == Tokens.LBRCE:
+                       tok = self.current_token
+                       res.register_advancement()
+                       self.advance()
+                       body = res.register(self.bool_expr())
+                       if res.error: return res
+
+                       if self.current_token.type == Tokens.RBRCE:
+                            res.register_advancement()
+                            self.advance()
+                            return res.success(FuncDefNode(id, params, body))
+                       else:
+                            return res.failure(InvalidSyntaxError(tok.pos_start, self.current_token.pos_end, "Expected '}'"))
+                    else:
+                        return res.failure(InvalidSyntaxError(tok.pos_start, self.current_token.pos_end, "Expected '{'"))
+                else:
+                    res.failure(InvalidSyntaxError(tok.pos_start, self.current_token.pos_end, "Expected ')'"))
+            else:
+                res.failure(InvalidSyntaxError(tok.pos_start, self.current_token.pos_end, "Expected '('"))
+
+        elif tok.matches(Tokens.KEYWORD , Tokens.LITE): 
+            res.register_advancement()
+            self.advance()
+            if self.current_token.type == Tokens.LPAREN:
+                tok = self.current_token
+                res.register_advancement()
+                self.advance()
+                params = None
+                if  self.current_token.type == Tokens.IDENTIFIER:
+                    params = res.register(self.parameters())
+                    if res.error: return res
+                    if self.current_token.type == Tokens.RPAREN:
+                        self.advance()
+                        res.register_advancement()
+
+                        body = res.register(self.bool_expr())
+                        if res.error: return res
+                        return res.success(FuncDefNode(None, params, body))
+                    else:
+                        res.failure(InvalidSyntaxError(tok.pos_start, self.current_token.pos_end, "Expected ')'"))  
+            else:
+                res.failure(InvalidSyntaxError(tok.pos_start, self.current_token.pos_end, "Expected '('"))
+        else:
+            return res.failure(InvalidSyntaxError(tok.pos_start, self.current_token.pos_end, "Expected 'def' or 'lite'"))
+                    
+    def call(self):
+        res = ParseResult()
+        atom = res.register(self.atom())
+        if res.error: return res
+        if self.current_token.type == Tokens.LPAREN:
+            self.advance()
+            res.register_advancement()
+            if self.current_token.type == Tokens.RPAREN:
+                self.advance()
+                res.register_advancement()
+                return res.success(FuncCallNode(atom, []))
+            else:
+                tok = self.current_token
+                # res.register_advancement()
+                # self.advance()
+                arg = res.register(self.arguments())
+                if res.error:return res
+                if self.current_token.type == Tokens.RPAREN:
+                    self.advance()
+                    res.register_advancement()
+                    return res.success(FuncCallNode(atom, arg))
+                else:
+                    return res.failure(InvalidSyntaxError(tok.pos_start, self.current_token.pos_end, "Expected ')'"))
+        return res.success(atom)
+            
+
+
+# class ParseResult:
     
-    def __init__(self):
-        self.error = None
-        self.node = None
-        self.advance_count = 0
+#     def __init__(self):
+#         self.error = None
+#         self.node = None
+#         self.advance_count = 0
     
-    def register(self, res):
-        self.advance_count += res.advance_count
-        if res.error: self.error = res.error
-        return res.node
+#     def register(self, res):
+#         self.advance_count += res.advance_count
+#         if res.error: self.error = res.error
+#         return res.node
     
-    def register_advancement(self):
-        self.advance_count += 1
-        return self
+#     def register_advancement(self):
+#         self.advance_count += 1
+#         return self
     
-    def success(self, node):
-        self.node = node
-        return self
+#     def success(self, node):
+#         self.node = node
+#         return self
     
-    def failure(self, error):
-        if not self.error or self.advance_count == 0:
-            self.error = error
-        return self
+#     def failure(self, error):
+#         if not self.error or self.advance_count == 0:
+#             self.error = error
+#         return self

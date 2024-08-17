@@ -34,12 +34,16 @@ class Tokens:
     #other
     DIGITS = '0123456789'
     LETTERS = string.ascii_letters
+    LETTERS_DIGITS = LETTERS + DIGITS
     ASSIGN = '='
     EOF = 'EOF'
-    WHITESPACE = ' \t'
     WHILE = 'while'
+    DEF = 'def'
+    LITE = 'lite'
     KEYWORD = 'KEYWORD'
-    KEYWORDS = [WHILE, 'def', 'return']
+    IDENTIFIER = 'IDENTIFIER'
+    KEYWORDS = [WHILE, DEF, LITE, 'return']
+    COMMA = ','
 
 class Token:
     def __init__(self, type, value=None, pos_start=None, pos_end=None):

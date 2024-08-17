@@ -1,7 +1,7 @@
 from Interpreter.Operations.Operation import UnaryOperation, BinaryOperation
 import Interpreter.Objects.Number as Number
 import Interpreter.Objects.Boolean as Boolean
-from Lexer.myerror import TypeError, RunTimeError
+from Error.RuntimeError import TypeError, RunTimeError
 
 class NumberOperation(BinaryOperation):
     def __init__(self, op_token, left, right):
