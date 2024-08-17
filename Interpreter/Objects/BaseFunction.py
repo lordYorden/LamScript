@@ -6,6 +6,7 @@ from Error.RuntimeError import RunTimeError
 class BaseFunction(Object):
     def __init__(self, name):
         super().__init__(name)
+        self.name = name
         
     def generate_new_context(self):
         from Interpreter.Context import Context

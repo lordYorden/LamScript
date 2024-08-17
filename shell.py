@@ -4,6 +4,8 @@ from Interpreter.interpreter import Interpreter
 from Interpreter.Context import Context
 from Interpreter.SymbolTable import SymbolTable
 from Interpreter.Objects.Number import Number
+from Interpreter.Objects.BuiltInFunction import BuiltInFunction
+from Interpreter.Objects.Object import Object
 
 def main():
     while True:
@@ -17,6 +19,9 @@ def main():
 
 global_symbol_table = SymbolTable()
 global_symbol_table.set("null", Number.null)
+global_symbol_table.set("none", Object.none)
+global_symbol_table.set("print", BuiltInFunction.print)
+global_symbol_table.set("clear", BuiltInFunction.clear)
 global_symbol_table.set("x", Number(10)) #for testing
 
 def run(fn, text):

@@ -19,6 +19,3 @@ class Boolean(Object):
         
     def find_unary_op(self, op_token):
         return self.find_op(op_token, self.unary_operations)
-        
-    def __repr__(self):
-        return f'{self.value}'

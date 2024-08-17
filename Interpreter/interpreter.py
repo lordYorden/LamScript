@@ -68,9 +68,9 @@ class Interpreter:
             value = res.register(self.visit(node.body_node, context))
             if res.error: return res
             #for debugging
-            print(value)
+            #print(value)
         
-        return res.success(None)
+        return res.success(Object.none)
     
     def visit_FuncDefNode(self, node, context):
         res = RuntimeResult()
