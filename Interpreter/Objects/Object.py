@@ -1,7 +1,7 @@
 from Error.RuntimeError import TypeError
 
 class Object: 
-    def __init__(self, value):
+    def __init__(self, value=None):
         self.value = value
         self.set_pos()
         self.set_context()
@@ -55,4 +55,6 @@ class Object:
             return op, None
         
     def __repr__(self):
-        return f'{self.value}'
+        return f'{self.value}'.lower() if self.value is not None else ''
+    
+Object.none = Object()

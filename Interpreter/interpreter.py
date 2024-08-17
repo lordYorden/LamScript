@@ -68,19 +68,19 @@ class Interpreter:
             value = res.register(self.visit(node.body_node, context))
             if res.error: return res
             #for debugging
-            print(value)
+            #print(value)
         
-        return res.success(None)
+        return res.success(Object.none)
     
     def visit_FuncDefNode(self, node, context):
         res = RuntimeResult()
-        function_name = node.identifier_token.value if node.identifier_token else "<Anonymous>"
+        function_name = node.identifier_token.value if node.identifier_token else None
         arg_name = [arg_name.get_token().value for arg_name in node.arg_nodes]
         body_node = node.body_node
         
         function_value = Function(function_name, body_node, arg_name).set_context(context).set_pos(node.pos_start, node.pos_end)
         
-        if function_name != "<Anonymous>":
+        if function_name:
             context.symbol_table.set(function_name, function_value)
         return res.success(function_value)
     

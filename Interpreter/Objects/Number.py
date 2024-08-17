@@ -42,9 +42,6 @@ class Number(Object):
     def set_value(self, value):
         self.value = value
         return self
-        
-    def __repr__(self):
-        return f'{self.value}'
     
 
 Number.null = Number(0)
