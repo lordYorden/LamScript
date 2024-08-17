@@ -1,5 +1,7 @@
 
-<staments> := NEWLINE* <bool_expr> (NEWLINE+ <bool_expr>)* NEWLINE*
+<statements> := NEWLINE* <statement> (NEWLINE+ <statement>)* NEWLINE*
+
+<statement> := <bool_expr> | <return> | <continue> | <break>
 
 <bool_expr> := <bool_term> (<low_order_bool_op> <bool_term>)*
 
@@ -17,23 +19,18 @@
 
 <call> := <atom> ( <arguments>? )?
 
-<atom> :=  <int> | <identifier> |  ( <bool_expr> ) | <while_expr> | <func_def>
+<atom> :=  <int> | <identifier> |  ( <bool_expr> ) 
+            | <while_expr> | <func_def> 
 
 <while_expr> := while (<bool_expr>) { <bool_expr> }
-              | while (<bool_expr>) { NEWLINE <staments> }
+              | while (<bool_expr>) { NEWLINE <statements> }
 
-while(true){
-
-
-    print(3)
-    print(3)
-
-
-
-}
+<return> := return <bool_expr>? NEWLINE
+<continue> := continue
+<break> := break
 
 <func_def> := def <identifier> ( <params>? ) { <bool_expr> }
-            | def <identifier> ( <params>? ) { <staments> }
+            | def <identifier> ( <params>? ) { <statements> }
             | lite ( <params>? ) <bool_expr>
 
 <params> := <identifier> (, <identifier>)*

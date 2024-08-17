@@ -42,7 +42,10 @@ class Tokens:
     LITE = 'lite'
     KEYWORD = 'KEYWORD'
     IDENTIFIER = 'IDENTIFIER'
-    KEYWORDS = [WHILE, DEF, LITE, 'return']
+    RETURN = 'return'
+    BREAK = 'break'
+    CONTINUE = 'continue'
+    KEYWORDS = [WHILE, DEF, LITE, RETURN, BREAK, CONTINUE]
     COMMA = ','
     NEWLINE = 'NEWLINE'
 
