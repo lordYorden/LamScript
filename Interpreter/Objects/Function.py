@@ -25,8 +25,12 @@ class Function(BaseFunction):
             if res.error: return res     
             if res.should_return(): break
 
-        return_value = res.func_return_value or (return_value if self.auto_return else Object.none)
-        return res.success(return_value)
+        if self.auto_return:
+            return res.success(return_value)
+        elif res.should_return():
+            return res.success(res.func_return_value)
+        else:
+            return res.success(Object.none)
     
     def copy(self):
         copy = Function(self.name, self.body_nodes, self.arg_name, self.auto_return)
