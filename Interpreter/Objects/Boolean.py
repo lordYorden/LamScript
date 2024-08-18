@@ -7,7 +7,8 @@ class Boolean(Object):
                     Tokens.NEQUEL: BooleanOperation.not_equels,
                     Tokens.AND: BooleanOperation.and_op,
                     Tokens.OR: BooleanOperation.or_op,
-                    Tokens.NOT: BooleanOperation.not_op}
+                    Tokens.NOT: BooleanOperation.not_op,
+                    Tokens.ADD: BooleanOperation.add}
     
     unary_operations = {Tokens.NOT: BooleanOperation.not_op}
     

@@ -1,5 +1,6 @@
 from Interpreter.Operations.Operation import UnaryOperation, BinaryOperation
 import Interpreter.Objects.Boolean as Boolean
+import Interpreter.Objects.Number as Number
 from Error.RuntimeError import TypeError
 
 class BooleanOperation(BinaryOperation):
@@ -55,3 +56,11 @@ class not_op(UnaryBooleanOperation):
     
     def not_(self, Object):
         return Boolean.Boolean(not Object.value)
+    
+class add(BooleanOperation): 
+    def __init__(self, op_token, left, right):
+        super().__init__(op_token, left, right)
+        self.set_op_func(self.add)
+    
+    def add(self, left, right):
+        return Number.Number(left.value + right.value)

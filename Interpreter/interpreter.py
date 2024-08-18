@@ -28,7 +28,7 @@ class Interpreter:
     def visit_BinOpNode(self, node, context):
         res = RuntimeResult()
         left = res.register(self.visit(node.left_node, context))
-        if res.error: return None, res.error
+        if res.error: return res
         
         if node.op_token.type == Tokens.OR:
             if isinstance(left,Boolean) and left.value == True:
@@ -39,7 +39,7 @@ class Interpreter:
                 
         
         right = res.register(self.visit(node.right_node, context))
-        if res.error: return None, res.error
+        if res.error: return res
         
         object, error = left.bin_op(node.op_token, right)
         if error: return res.failure(error)

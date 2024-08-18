@@ -7,9 +7,9 @@
 
 <bool_term> := <bool_factor> (<equals> <bool_factor>)*
 
-<bool_factor> := <bool> | <not> <bool_expr> | <comperison_expr>
+<bool_factor> := <bool> | <not> <bool_expr> | <comparison_expr>
 
-<comperison_expr> =: <math_expr> (<comperison_op> <math_expr>)*
+<comparison_expr> =: <math_expr> (<comperison_op> <math_expr>)*
 
 <math_expr> := <math_term> (<low_order_math_op> <math_term>)*
 
