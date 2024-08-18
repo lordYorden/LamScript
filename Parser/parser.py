@@ -144,10 +144,10 @@ class Parser:
             if self.current_token.type == Tokens.NEWLINE:
                 res.register_advancement()
                 self.advance()
-                body_nodes =  res.register(self.statements())
+                body_nodes =  res.register(self.statements(False))
                 if res.error: return res
             else:
-                expr = res.register(self.statement())
+                expr = res.register(self.statement(False))
                 if res.error: return res
                 body_nodes.append(expr)
             
@@ -263,17 +263,17 @@ class Parser:
                         if self.current_token.type == Tokens.NEWLINE:
                             res.register_advancement()
                             self.advance()
-                            body_nodes =  res.register(self.statements())
+                            body_nodes =  res.register(self.statements(True))
                             if res.error: return res
                         else:
-                            expr = res.register(self.statement())
+                            expr = res.register(self.statement(True))
                             if res.error: return res
                             body_nodes.append(expr)
 
                         if self.current_token.type == Tokens.RBRCE:
                             res.register_advancement()
                             self.advance()
-                            return res.success(FuncDefNode(id, params, body_nodes))
+                            return res.success(FuncDefNode(id, params, body_nodes,False))
                         else:
                             return res.failure(InvalidSyntaxError(tok.pos_start, self.current_token.pos_end, "Expected '}'"))
                     else:
@@ -298,9 +298,9 @@ class Parser:
                         self.advance()
                         res.register_advancement()
 
-                        body = res.register(self.statement())
+                        body = res.register(self.statement(False))
                         if res.error: return res
-                        return res.success(FuncDefNode(None, params, body))
+                        return res.success(FuncDefNode(None, params, [body], True))
                     else:
                         return res.failure(InvalidSyntaxError(tok.pos_start, self.current_token.pos_end, "Expected ')'"))  
             else:
@@ -333,7 +333,7 @@ class Parser:
                     return res.failure(InvalidSyntaxError(tok.pos_start, self.current_token.pos_end, "Expected ')'"))
         return res.success(atom)
             
-    def statements(self):
+    def statements(self, isInsideFunc):
         res = ParseResult()
         statements = []
         pos_start = self.current_token.pos_start.copy()
@@ -342,7 +342,7 @@ class Parser:
             res.register_advancement()
             self.advance()
             
-        statement = res.register(self.statement())
+        statement = res.register(self.statement(isInsideFunc))
         if res.error: return res
         statements.append(statement)
         
@@ -353,13 +353,13 @@ class Parser:
             if self.current_token.type == Tokens.RBRCE:
                 break
             
-            statement = res.register(self.statement())
+            statement = res.register(self.statement(isInsideFunc))
             if res.error: return res
             statements.append(statement)
             
         return res.success(statements)
 
-    def return_expr(self):
+    def return_expr(self, isInsideFunc):
         res = ParseResult()
         tok = self.current_token
         if tok.matches(Tokens.KEYWORD, Tokens.RETURN):
@@ -367,11 +367,18 @@ class Parser:
             self.advance()
             
             if self.current_token.type == Tokens.NEWLINE:
-                return res.success(ReturnNode(None, tok.pos_start, tok.pos_end))
+                if isInsideFunc:
+                    return res.success(ReturnNode(None, tok.pos_start, tok.pos_end))
+                else:
+                    return res.failure(InvalidSyntaxError(tok.pos_start, self.current_token.pos_end, "return statement outside function"))
             else:
                 expr = res.register(self.bool_expr())
                 if res.error: return res
-                return res.success(ReturnNode(expr, tok.pos_start, self.current_token.pos_end))
+                
+                if isInsideFunc:
+                    return res.success(ReturnNode(expr, tok.pos_start, self.current_token.pos_end))
+                else:
+                    return res.failure(InvalidSyntaxError(tok.pos_start, self.current_token.pos_end, "return statement outside function"))
         else:
             return res.failure(InvalidSyntaxError(tok.pos_start, self.current_token.pos_end, "Expected 'return'"))
 
@@ -395,11 +402,11 @@ class Parser:
         else:
             return res.failure(InvalidSyntaxError(tok.pos_start, self.current_token.pos_end, "Expected 'Break'"))
          
-    def statement(self):
+    def statement(self, isInsideFunc):
         #res = ParseResult()
         tok = self.current_token
         if tok.matches(Tokens.KEYWORD, Tokens.RETURN):
-            return self.return_expr()
+            return self.return_expr(isInsideFunc)
         elif tok.matches(Tokens.KEYWORD, Tokens.CONTINUE):
             return self.continue_expr()
         elif tok.matches(Tokens.KEYWORD, Tokens.BREAK):

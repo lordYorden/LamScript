@@ -74,9 +74,23 @@ class Interpreter:
             if not condition_value:
                 break
             
+            continue_loop = False
+            
             for n in node.body_nodes:
                 value = res.register(self.visit(n, context))
-                if res.error: res
+                if res.error: return res
+                
+                if res.should_return():
+                    return res
+                elif res.loop_should_break:
+                    return res.success(Object.none)
+                elif res.loop_should_continue:
+                    continue_loop = False
+                    break
+                
+            if continue_loop:
+                continue_loop = False
+                continue
         
         return res.success(Object.none)
     
@@ -86,7 +100,7 @@ class Interpreter:
         arg_name = [arg_name.get_token().value for arg_name in node.arg_nodes]
         body_nodes = node.body_nodes
         
-        function_value = Function(function_name, body_nodes, arg_name).set_context(context).set_pos(node.pos_start, node.pos_end)
+        function_value = Function(function_name, body_nodes, arg_name, node.auto_return).set_context(context).set_pos(node.pos_start, node.pos_end)
         
         if function_name:
             context.symbol_table.set(function_name, function_value)
@@ -111,5 +125,21 @@ class Interpreter:
         if res.error: return res
         
         return res.success(return_value.set_pos(node.pos_start, node.pos_end).set_context(new_context))
+    
+    def visit_ReturnNode(self, node, context):
+        res = RuntimeResult()
+        if node.node_to_return:
+            value = res.register(self.visit(node.node_to_return, context))
+            if res.error: return res
+        else:
+            value = Object.none
+        
+        return res.success_return(value)
+    
+    def visit_ContinueNode(self, node, context):
+        return RuntimeResult().success_continue()
+    
+    def visit_BreakNode(self, node, context):  
+        return RuntimeResult().success_break()
         
         

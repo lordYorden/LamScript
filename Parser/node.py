@@ -60,7 +60,7 @@ class whileNode:
             self.pos_end = self.condition_node.pos_end
 
     def __repr__(self):
-        return f'while ({self.condition_node}) {Tokens.LBRCE} {self.body_node} {Tokens.RBRCE}'
+        return f'while ({self.condition_node}) {Tokens.LBRCE} {self.body_nodes} {Tokens.RBRCE}'
     
 class SymbolAcsessNode:
     def __init__(self, identifier_token):
@@ -75,10 +75,11 @@ class SymbolAcsessNode:
         return f'{self.identifier_token}'
     
 class FuncDefNode:
-    def __init__(self, identifier_node, arg_nodes, body_nodes):
+    def __init__(self, identifier_node, arg_nodes, body_nodes,auto_return):
         self.identifier_token = identifier_node.identifier_token if identifier_node else None
         self.arg_nodes = arg_nodes
         self.body_nodes = body_nodes
+        self.auto_return = auto_return
         
         if self.identifier_token:
             self.pos_start = self.identifier_token.pos_start

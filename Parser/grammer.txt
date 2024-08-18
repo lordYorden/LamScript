@@ -30,7 +30,7 @@
 <break> := break
 
 <func_def> := def <identifier> ( <params>? ) { <bool_expr> }
-            | def <identifier> ( <params>? ) { <statements> }
+            | def <identifier> ( <params>? ) { NEWLINE <statements> }
             | lite ( <params>? ) <bool_expr>
 
 <params> := <identifier> (, <identifier>)*

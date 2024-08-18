@@ -31,7 +31,7 @@ def run(fn, text):
         return None, error
     
     #print("finshed lexing")
-    #print(tokens)
+    print(tokens)
     
     #parse tree
     parser = Parser(tokens)
@@ -39,7 +39,7 @@ def run(fn, text):
     if ast.error:
         return None, ast.error
     
-    #print(ast.node)
+    print(ast.node)
 
     interpreter = Interpreter()
     context = Context('<program>')
