@@ -24,6 +24,21 @@ class Position:
             pass #fix in future
         return self
     
+    def extract_str(self, end_pos):
+
+        lines = self.ftxt.splitlines()
+        
+        if self.ln == end_pos.ln:
+            return lines[self.ln]
+
+        extracted_text = lines[self.ln] + '\n'
+
+        for line_no in range(self.ln + 1, end_pos.ln):
+            extracted_text += lines[line_no] + '\n'
+
+        extracted_text += lines[end_pos.ln]
+        return extracted_text
+    
 
     def copy(self):
         return Position(self.index, self.ln, self.col, self.fn, self.ftxt)

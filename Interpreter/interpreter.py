@@ -5,6 +5,7 @@ from Interpreter.RuntimeResult import RuntimeResult
 from Error.RuntimeError import RunTimeError
 from Interpreter.Objects.Function import Function
 from Interpreter.Context import Context
+from Lexer.Tokens import Tokens
 
 class Interpreter:
     def visit(self, node, context):
@@ -27,10 +28,18 @@ class Interpreter:
     def visit_BinOpNode(self, node, context):
         res = RuntimeResult()
         left = res.register(self.visit(node.left_node, context))
-        if res.error: return None, res.error
+        if res.error: return res
+        
+        if node.op_token.type == Tokens.OR:
+            if isinstance(left,Boolean) and left.value == True:
+                return res.success(left)
+        if node.op_token.type == Tokens.AND:
+            if isinstance(left,Boolean) and left.value == False:
+                return res.success(left)
+                
         
         right = res.register(self.visit(node.right_node, context))
-        if res.error: return None, res.error
+        if res.error: return res
         
         object, error = left.bin_op(node.op_token, right)
         if error: return res.failure(error)
@@ -65,10 +74,23 @@ class Interpreter:
             if not condition_value:
                 break
             
-            value = res.register(self.visit(node.body_node, context))
-            if res.error: return res
-            #for debugging
-            #print(value)
+            continue_loop = False
+            
+            for n in node.body_nodes:
+                value = res.register(self.visit(n, context))
+                if res.error: return res
+                
+                if res.should_return():
+                    return res
+                elif res.loop_should_break:
+                    return res.success(Object.none)
+                elif res.loop_should_continue:
+                    continue_loop = False
+                    break
+                
+            if continue_loop:
+                continue_loop = False
+                continue
         
         return res.success(Object.none)
     
@@ -76,9 +98,9 @@ class Interpreter:
         res = RuntimeResult()
         function_name = node.identifier_token.value if node.identifier_token else None
         arg_name = [arg_name.get_token().value for arg_name in node.arg_nodes]
-        body_node = node.body_node
+        body_nodes = node.body_nodes
         
-        function_value = Function(function_name, body_node, arg_name).set_context(context).set_pos(node.pos_start, node.pos_end)
+        function_value = Function(function_name, body_nodes, arg_name, node.auto_return).set_context(context).set_pos(node.pos_start, node.pos_end)
         
         if function_name:
             context.symbol_table.set(function_name, function_value)
@@ -103,5 +125,21 @@ class Interpreter:
         if res.error: return res
         
         return res.success(return_value.set_pos(node.pos_start, node.pos_end).set_context(new_context))
+    
+    def visit_ReturnNode(self, node, context):
+        res = RuntimeResult()
+        if node.node_to_return:
+            value = res.register(self.visit(node.node_to_return, context))
+            if res.error: return res
+        else:
+            value = Object.none
+        
+        return res.success_return(value)
+    
+    def visit_ContinueNode(self, node, context):
+        return RuntimeResult().success_continue()
+    
+    def visit_BreakNode(self, node, context):  
+        return RuntimeResult().success_break()
         
         

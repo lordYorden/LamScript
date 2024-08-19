@@ -1,4 +1,4 @@
-from Parser.node import NumberNode, BinOpNode, UnaryOpNode, BooleanNode, whileNode ,SymbolAcsessNode , FuncDefNode , FuncCallNode
+from Parser.node import NumberNode, BinOpNode, UnaryOpNode, BooleanNode, whileNode ,SymbolAcsessNode , FuncDefNode , FuncCallNode, ReturnNode, ContinueNode, BreakNode
 from Lexer.Tokens import Tokens, Token
 from Error.Error import InvalidSyntaxError
 from Parser.ParseResult import ParseResult
@@ -15,6 +15,7 @@ class Parser:
         self.tokens = tokens
         self.token_index = -1
         self.advance()
+        self.isInsideLoop = False
         
     def advance(self):
         self.token_index += 1
@@ -23,7 +24,7 @@ class Parser:
         return self.current_token
     
     def parse(self):
-        res = self.bool_expr()
+        res = self.statements(False)
         if not res.error and self.current_token.type != Tokens.EOF:
             return res.failure(InvalidSyntaxError(self.current_token.pos_start, self.current_token.pos_end, "Unkonwn operation for type"))
         return res
@@ -137,16 +138,26 @@ class Parser:
         
         if self.current_token.type == Tokens.LBRCE:
             tok = self.current_token
-            
             res.register_advancement()
             self.advance()
-            body = res.register(self.bool_expr())
-            if res.error: return res
+            self.isInsideLoop = True
+
+            body_nodes = []
+            if self.current_token.type == Tokens.NEWLINE:
+                res.register_advancement()
+                self.advance()
+                body_nodes =  res.register(self.statements(False))
+                if res.error: return res
+            else:
+                expr = res.register(self.statement(False))
+                if res.error: return res
+                body_nodes.append(expr)
             
             if self.current_token.type == Tokens.RBRCE:
                 res.register_advancement()
                 self.advance()
-                return res.success(whileNode(condition, body))
+                self.isInsideLoop = False
+                return res.success(whileNode(condition, body_nodes, self.current_token.pos_end))
             else:
                 return res.failure(InvalidSyntaxError(tok.pos_start, self.current_token.pos_end, "Expected '}'"))
         else:
@@ -223,8 +234,7 @@ class Parser:
                 self.advance()
                 
         return res.success(arguments)
-    
-
+  
     def function_def(self):
         res = ParseResult()
         tok = self.current_token
@@ -248,17 +258,27 @@ class Parser:
                     res.register_advancement()
 
                     if self.current_token.type == Tokens.LBRCE:
-                       tok = self.current_token
-                       res.register_advancement()
-                       self.advance()
-                       body = res.register(self.bool_expr())
-                       if res.error: return res
-
-                       if self.current_token.type == Tokens.RBRCE:
+                        tok = self.current_token
+                        res.register_advancement()
+                        self.advance()
+                       
+                        body_nodes = []
+                        if self.current_token.type == Tokens.NEWLINE:
                             res.register_advancement()
                             self.advance()
-                            return res.success(FuncDefNode(id, params, body))
-                       else:
+                            body_nodes =  res.register(self.statements(True))
+                            if res.error: return res
+                        else:
+                            expr = res.register(self.statement(True))
+                            if res.error: return res
+                            body_nodes.append(expr)
+
+                        if self.current_token.type == Tokens.RBRCE:
+                            res.register_advancement()
+                            self.advance()
+                            
+                            return res.success(FuncDefNode(id, params, body_nodes, False, self.current_token.pos_end))
+                        else:
                             return res.failure(InvalidSyntaxError(tok.pos_start, self.current_token.pos_end, "Expected '}'"))
                     else:
                         return res.failure(InvalidSyntaxError(tok.pos_start, self.current_token.pos_end, "Expected '{'"))
@@ -282,9 +302,9 @@ class Parser:
                         self.advance()
                         res.register_advancement()
 
-                        body = res.register(self.bool_expr())
+                        body = res.register(self.statement(False))
                         if res.error: return res
-                        return res.success(FuncDefNode(None, params, body))
+                        return res.success(FuncDefNode(None, params, [body], True))
                     else:
                         return res.failure(InvalidSyntaxError(tok.pos_start, self.current_token.pos_end, "Expected ')'"))  
             else:
@@ -317,8 +337,101 @@ class Parser:
                     return res.failure(InvalidSyntaxError(tok.pos_start, self.current_token.pos_end, "Expected ')'"))
         return res.success(atom)
             
+    def statements(self, isInsideFunc):
+        res = ParseResult()
+        statements = []
+        pos_start = self.current_token.pos_start.copy()
+        
+        while self.current_token.type == Tokens.NEWLINE:
+            res.register_advancement()
+            self.advance()
+            
+        statement = res.register(self.statement(isInsideFunc))
+        if res.error: return res
+        statements.append(statement)
+        
+        while self.current_token.type == Tokens.NEWLINE:
+            res.register_advancement()
+            self.advance()
+            
+            while self.current_token.type == Tokens.NEWLINE:
+                res.register_advancement()
+                self.advance()
+            
+            if self.current_token.type == Tokens.RBRCE:
+                break
+            
+            statement = res.register(self.statement(isInsideFunc))
+            if res.error: return res
+            statements.append(statement)
+            
+        while self.current_token.type == Tokens.NEWLINE:
+                res.register_advancement()
+                self.advance()
+            
+        return res.success(statements)
 
+    def return_expr(self, isInsideFunc):
+        res = ParseResult()
+        tok = self.current_token
+        if tok.matches(Tokens.KEYWORD, Tokens.RETURN):
+            res.register_advancement()
+            self.advance()
+            
+            if self.current_token.type == Tokens.NEWLINE:
+                if isInsideFunc:
+                    return res.success(ReturnNode(None, tok.pos_start, tok.pos_end))
+                else:
+                    return res.failure(InvalidSyntaxError(tok.pos_start, self.current_token.pos_end, "return statement outside function"))
+            else:
+                expr = res.register(self.bool_expr())
+                if res.error: return res
+                
+                if isInsideFunc:
+                    return res.success(ReturnNode(expr, tok.pos_start, self.current_token.pos_end))
+                else:
+                    return res.failure(InvalidSyntaxError(tok.pos_start, self.current_token.pos_end, "return statement outside function"))
+        else:
+            return res.failure(InvalidSyntaxError(tok.pos_start, self.current_token.pos_end, "Expected 'return'"))
 
+    def continue_expr(self):
+        res = ParseResult()
+        tok = self.current_token
+        if tok.matches(Tokens.KEYWORD, Tokens.CONTINUE):
+            res.register_advancement()
+            self.advance()
+            if self.isInsideLoop:
+                return res.success(ContinueNode(tok.pos_start, tok.pos_end))
+            else:
+                return res.failure(InvalidSyntaxError(tok.pos_start, self.current_token.pos_end, "continue statement outside loop"))
+        else:
+            return res.failure(InvalidSyntaxError(tok.pos_start, self.current_token.pos_end, "Expected 'continue'"))
+
+    def break_expr(self):
+        res = ParseResult()
+        tok = self.current_token
+        if tok.matches(Tokens.KEYWORD, Tokens.BREAK):
+            res.register_advancement()
+            self.advance()
+            
+            if self.isInsideLoop:
+                return res.success(BreakNode(tok.pos_start, tok.pos_end))
+            else:
+                return res.failure(InvalidSyntaxError(tok.pos_start, self.current_token.pos_end, "break statement outside loop"))
+        else:
+            return res.failure(InvalidSyntaxError(tok.pos_start, self.current_token.pos_end, "Expected 'Break'"))
+         
+    def statement(self, isInsideFunc):
+        #res = ParseResult()
+        tok = self.current_token
+        if tok.matches(Tokens.KEYWORD, Tokens.RETURN):
+            return self.return_expr(isInsideFunc)
+        elif tok.matches(Tokens.KEYWORD, Tokens.CONTINUE):
+            return self.continue_expr()
+        elif tok.matches(Tokens.KEYWORD, Tokens.BREAK):
+            return self.break_expr()
+        else:
+            return self.bool_expr()
 # class ParseResult:
     
 #     def __init__(self):

@@ -10,7 +10,7 @@ class Lexer:
         self.advance()
     
     def advance(self):
-        self.pos.advance()
+        self.pos.advance(self.current_char)
         self.current_char = self.text[self.pos.index] if self.pos.index < len(self.text) else None
         
     def backtrack(self):
@@ -23,6 +23,11 @@ class Lexer:
         while self.current_char != None:
             if self.current_char in ' \t':
                 self.advance()
+            elif self.current_char in ';\n':
+                tokens.append(Token(Tokens.NEWLINE, pos_start=self.pos))
+                self.advance()
+            elif self.current_char == '#':
+                self.ignore_comments()
             elif self.current_char in Tokens.DIGITS:
                 tokens.append(self.make_number())
             elif self.current_char in Tokens.LETTERS:
@@ -153,6 +158,12 @@ class Lexer:
                 return Token(tok_type, False, pos_start, self.pos)
 
         return Token(Tokens.IDENTIFIER, key_str, pos_start, self.pos)
+    
+    def ignore_comments(self):
+        self.advance()
+        while self.current_char != '\n':
+            self.advance()
+        self.advance()
         
     
     #deprecated

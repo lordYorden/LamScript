@@ -1,11 +1,15 @@
 
+<statements> := NEWLINE* <statement> (NEWLINE+ <statement>)* NEWLINE*
+
+<statement> := <bool_expr> | <return> | <continue> | <break>
+
 <bool_expr> := <bool_term> (<low_order_bool_op> <bool_term>)*
 
 <bool_term> := <bool_factor> (<equals> <bool_factor>)*
 
-<bool_factor> := <bool> | <not> <bool_expr> | <comperison_expr>
+<bool_factor> := <bool> | <not> <bool_expr> | <comparison_expr>
 
-<comperison_expr> =: <math_expr> (<comperison_op> <math_expr>)*
+<comparison_expr> =: <math_expr> (<comperison_op> <math_expr>)*
 
 <math_expr> := <math_term> (<low_order_math_op> <math_term>)*
 
@@ -15,11 +19,18 @@
 
 <call> := <atom> ( <arguments>? )?
 
-<atom> :=  <int> | <identifier> |  ( <bool_expr> ) | <while_expr> | <func_def>
+<atom> :=  <int> | <identifier> |  ( <bool_expr> ) 
+            | <while_expr> | <func_def> 
 
 <while_expr> := while (<bool_expr>) { <bool_expr> }
+              | while (<bool_expr>) { NEWLINE <statements> }
 
-<func_def> := def <identifier> ( <params>? ) { return? <bool_expr> }
+<return> := return <bool_expr>? NEWLINE
+<continue> := continue
+<break> := break
+
+<func_def> := def <identifier> ( <params>? ) { <bool_expr> }
+            | def <identifier> ( <params>? ) { NEWLINE <statements> }
             | lite ( <params>? ) <bool_expr>
 
 <params> := <identifier> (, <identifier>)*
