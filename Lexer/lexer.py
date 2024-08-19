@@ -10,7 +10,7 @@ class Lexer:
         self.advance()
     
     def advance(self):
-        self.pos.advance()
+        self.pos.advance(self.current_char)
         self.current_char = self.text[self.pos.index] if self.pos.index < len(self.text) else None
         
     def backtrack(self):

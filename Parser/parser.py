@@ -23,7 +23,7 @@ class Parser:
         return self.current_token
     
     def parse(self):
-        res = self.bool_expr()
+        res = self.statements(False)
         if not res.error and self.current_token.type != Tokens.EOF:
             return res.failure(InvalidSyntaxError(self.current_token.pos_start, self.current_token.pos_end, "Unkonwn operation for type"))
         return res
@@ -273,6 +273,7 @@ class Parser:
                         if self.current_token.type == Tokens.RBRCE:
                             res.register_advancement()
                             self.advance()
+                            
                             return res.success(FuncDefNode(id, params, body_nodes,False))
                         else:
                             return res.failure(InvalidSyntaxError(tok.pos_start, self.current_token.pos_end, "Expected '}'"))
@@ -350,12 +351,20 @@ class Parser:
             res.register_advancement()
             self.advance()
             
+            while self.current_token.type == Tokens.NEWLINE:
+                res.register_advancement()
+                self.advance()
+            
             if self.current_token.type == Tokens.RBRCE:
                 break
             
             statement = res.register(self.statement(isInsideFunc))
             if res.error: return res
             statements.append(statement)
+            
+        while self.current_token.type == Tokens.NEWLINE:
+                res.register_advancement()
+                self.advance()
             
         return res.success(statements)
 

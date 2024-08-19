@@ -36,6 +36,10 @@ class BuiltInFunction(BaseFunction):
         return RuntimeResult().success(Object.none)
     execute_clear.arg_names = []
     
+    def execute_exit(self, context):
+        quit()
+    execute_exit.arg_names = []
+    
     def copy(self):
         copy = BuiltInFunction(self.name)
         copy.set_context(self.context)
@@ -47,3 +51,4 @@ class BuiltInFunction(BaseFunction):
     
 BuiltInFunction.print = BuiltInFunction('print')
 BuiltInFunction.clear = BuiltInFunction('clear')
+BuiltInFunction.exit = BuiltInFunction('exit')
