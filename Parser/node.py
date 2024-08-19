@@ -59,7 +59,7 @@ class UnaryOpNode(BaseNode):
         return f'({self.op_token}, {self.node})'
     
 class whileNode(BaseNode):
-    def __init__(self, condition_node, body_nodes):
+    def __init__(self, condition_node, body_nodes, pos_end=None):
         super().__init__(condition_node.pos_start, condition_node.pos_end)
         self.condition_node = condition_node
         self.body_nodes = body_nodes
@@ -72,7 +72,8 @@ class whileNode(BaseNode):
         else:
             self.pos_end = self.condition_node.pos_end
             
-        
+        if pos_end:
+            self.pos_end = pos_end
 
     def __repr__(self):
         return f'while ({self.condition_node}) {Tokens.LBRCE} {self.body_nodes} {Tokens.RBRCE}'
@@ -91,7 +92,7 @@ class SymbolAcsessNode(BaseNode):
         return f'{self.identifier_token}'
     
 class FuncDefNode(BaseNode):
-    def __init__(self, identifier_node, arg_nodes, body_nodes,auto_return):
+    def __init__(self, identifier_node, arg_nodes, body_nodes,auto_return, pos_end=None):
         super().__init__(identifier_node.pos_start, identifier_node.pos_end)
         self.identifier_token = identifier_node.identifier_token if identifier_node else None
         self.arg_nodes = arg_nodes
@@ -105,7 +106,10 @@ class FuncDefNode(BaseNode):
         
         if len(self.body_nodes) > 0:
             #self.pos_start = self.body_nodes[0].pos_start
-            self.pos_end = self.body_nodes[len(self.body_nodes) - 1].pos_end        
+            self.pos_end = self.body_nodes[len(self.body_nodes) - 1].pos_end     
+            
+        if pos_end:
+            self.pos_end = pos_end 
 
     def __repr__(self):
         return f'{self.identifier_token}({self.arg_nodes}) {Tokens.LBRCE} {self.body_nodes} {Tokens.RBRCE}'

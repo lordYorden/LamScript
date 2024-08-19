@@ -8,8 +8,10 @@ def fib(n) {
     return ((n==0) || (n==1)) || (fib(n-1) + fib(n-2))
 }
 
-
-
+while (true){
+    print(3)
+    break
+}
 
 print(fib(5))
 print(fact(3))

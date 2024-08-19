@@ -29,8 +29,10 @@ def main():
         if not fn.endswith(FILE_EXTENSION):
             print(f"Invalid file type file must end with {FILE_EXTENSION} file")
             return
+        elif run_line_by_line:
+             print(f"Running {fn} file in line by line mode:")
         else:
-            print(f"Running {fn} file, for a line by line run with -l")
+            print(f"Running {fn} file (for a line by line use: -l {fn}):")
         
         file = open(fn, 'r')
         ftx = file.read()
@@ -90,13 +92,16 @@ def run(fn, text):
             if run_line_by_line:
                 #print(node)
                 print(node.print_statement())
-                input("Press Enter to continue...")
+                print("result: ", end="")
                 
             result = interpreter.visit(node, context)
             if result.error: break
             
-            if run_line_by_line and result.value != Object.none: 
-                print(result.value)
+            if run_line_by_line:
+                if result.value != Object.none:
+                    print(result.value)
+                sys.stdout.flush()
+                input("\nPress Enter to move to the next statement...\n")
 
     else:
         result = interpreter.visit(ast.node, context)

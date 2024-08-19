@@ -154,7 +154,7 @@ class Parser:
             if self.current_token.type == Tokens.RBRCE:
                 res.register_advancement()
                 self.advance()
-                return res.success(whileNode(condition, body_nodes))
+                return res.success(whileNode(condition, body_nodes, self.current_token.pos_end))
             else:
                 return res.failure(InvalidSyntaxError(tok.pos_start, self.current_token.pos_end, "Expected '}'"))
         else:
@@ -274,7 +274,7 @@ class Parser:
                             res.register_advancement()
                             self.advance()
                             
-                            return res.success(FuncDefNode(id, params, body_nodes,False))
+                            return res.success(FuncDefNode(id, params, body_nodes, False, self.current_token.pos_end))
                         else:
                             return res.failure(InvalidSyntaxError(tok.pos_start, self.current_token.pos_end, "Expected '}'"))
                     else:
