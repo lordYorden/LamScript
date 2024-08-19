@@ -15,6 +15,7 @@ class Parser:
         self.tokens = tokens
         self.token_index = -1
         self.advance()
+        self.isInsideLoop = False
         
     def advance(self):
         self.token_index += 1
@@ -139,6 +140,7 @@ class Parser:
             tok = self.current_token
             res.register_advancement()
             self.advance()
+            self.isInsideLoop = True
 
             body_nodes = []
             if self.current_token.type == Tokens.NEWLINE:
@@ -154,6 +156,7 @@ class Parser:
             if self.current_token.type == Tokens.RBRCE:
                 res.register_advancement()
                 self.advance()
+                self.isInsideLoop = False
                 return res.success(whileNode(condition, body_nodes, self.current_token.pos_end))
             else:
                 return res.failure(InvalidSyntaxError(tok.pos_start, self.current_token.pos_end, "Expected '}'"))
@@ -397,7 +400,10 @@ class Parser:
         if tok.matches(Tokens.KEYWORD, Tokens.CONTINUE):
             res.register_advancement()
             self.advance()
-            return res.success(ContinueNode(tok.pos_start, tok.pos_end))
+            if self.isInsideLoop:
+                return res.success(ContinueNode(tok.pos_start, tok.pos_end))
+            else:
+                return res.failure(InvalidSyntaxError(tok.pos_start, self.current_token.pos_end, "continue statement outside loop"))
         else:
             return res.failure(InvalidSyntaxError(tok.pos_start, self.current_token.pos_end, "Expected 'continue'"))
 
@@ -407,7 +413,11 @@ class Parser:
         if tok.matches(Tokens.KEYWORD, Tokens.BREAK):
             res.register_advancement()
             self.advance()
-            return res.success(BreakNode(tok.pos_start, tok.pos_end))
+            
+            if self.isInsideLoop:
+                return res.success(BreakNode(tok.pos_start, tok.pos_end))
+            else:
+                return res.failure(InvalidSyntaxError(tok.pos_start, self.current_token.pos_end, "break statement outside loop"))
         else:
             return res.failure(InvalidSyntaxError(tok.pos_start, self.current_token.pos_end, "Expected 'Break'"))
          
