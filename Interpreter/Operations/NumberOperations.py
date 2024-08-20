@@ -2,12 +2,15 @@ from Interpreter.Operations.Operation import UnaryOperation, BinaryOperation
 import Interpreter.Objects.Number as Number
 import Interpreter.Objects.Boolean as Boolean
 from Error.RuntimeError import TypeError, RunTimeError
+from Interpreter.Objects.Object import Object
 
 class NumberOperation(BinaryOperation):
     def __init__(self, op_token, left, right):
         super().__init__(op_token, left, right)
     
     def eval(self):
+        value, error = super().eval()
+        if error: return None, error
         value, error = self.op_func(self.left, self.right)
         if error: return None, error
         return value, None
@@ -17,6 +20,8 @@ class UnaryNumberOperation(UnaryOperation):
         super().__init__(op_token, Object)
     
     def eval(self):
+        value, error = super().eval()
+        if error: return None, error
         value, error = self.op_func(self.left)
         if error: return None, error
         return value, None
