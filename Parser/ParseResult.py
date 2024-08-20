@@ -10,10 +10,10 @@ class ParseResult:
         """Register the result of the parse.
 
         Args:
-            res (token): the result of the parse
+            res (ParseResult): the result of the parse
 
         Returns:
-            node: the node of the parse
+            BaseNode: the node returned from the parse
         """
         self.advance_count += res.advance_count
         if res.error: self.error = res.error
@@ -23,7 +23,7 @@ class ParseResult:
         """Register the advancement of the parse.
 
         Returns:
-            position: the new position of the parse
+            ParseResult: the new ParseResult of the parser
         """
         self.advance_count += 1
         return self
@@ -32,10 +32,10 @@ class ParseResult:
         """Register the success of the parse.
 
         Args:
-            node (node): the node of the parse
+            node (BaseNode): the node of the parse
 
         Returns:
-            position: the new position of the parse
+            ParseResult: the new ParseResult of the parser
         """
         self.node = node
         return self
@@ -47,7 +47,7 @@ class ParseResult:
             error (error): the error of the parse
 
         Returns:
-            position: the new position of the parse
+            ParseResult: the new ParseResult of the parse
         """
         if not self.error or self.advance_count == 0:
             self.error = error

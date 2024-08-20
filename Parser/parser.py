@@ -4,7 +4,6 @@ from Error.Error import InvalidSyntaxError
 from Parser.ParseResult import ParseResult
 
 class Parser:
-    """Class that contains the parser for the language."""
     parenthesis = (Tokens.LPAREN, Tokens.RPAREN)
     math_low_order_ops = (Tokens.ADD, Tokens.SUB)
     math_high_order_ops = (Tokens.MUL, Tokens.DIV, Tokens.IDIV, Tokens.MOD)
@@ -13,10 +12,11 @@ class Parser:
     comparisson_ops = (Tokens.LESS, Tokens.LESSE, Tokens.GREATER, Tokens.GREATERE, Tokens.EQUEL, Tokens.NEQUEL)
     
     def __init__(self, tokens):
-        """The parser class that contains the parser for the language.
+        """The parser class that follows the languege grammar.
+        Layed out in grammer.txt
 
         Args:
-            tokens (token): the tokens to parse.
+            tokens (Token[]): The lexer tokens to parse.
         """
         self.tokens = tokens
         self.token_index = -1
@@ -27,7 +27,7 @@ class Parser:
         """Move the current token to the next token.
 
         Returns:
-            token: the current token.
+            Token: the next token.
         """
         self.token_index += 1
         if self.token_index < len(self.tokens):
@@ -35,10 +35,10 @@ class Parser:
         return self.current_token
     
     def parse(self):
-        """Parse the tokens and return the result.
+        """Parse the tokens and return the Abstract Syntax Tree.
 
         Returns:
-            token: the result of the parsing or the error.
+            ParseResult: the result of the parsing.
         """
         res = self.statements(False)
         if not res.error and self.current_token.type != Tokens.EOF:
@@ -49,7 +49,7 @@ class Parser:
         """Parse the boolean expression.
 
         Returns:
-            method: the boolean operation.
+            ParseResult: the boolean expression syntax tree.
         """
         return self.bin_op(self.bool_term, self.bool_low_order_ops)
     
@@ -57,7 +57,7 @@ class Parser:
         """Parse the boolean term.
 
         Returns:
-            method: the boolean operation.
+            ParseResult: the boolean term syntax tree.
         """
         return self.bin_op(self.bool_factor, self.equel_ops)
     
@@ -65,7 +65,7 @@ class Parser:
         """Parse the boolean factor.
 
         Returns:
-            method: the success of the parsing or the error.
+            ParseResult: the boolean factor syntax tree.
         """
         res = ParseResult()
         tok = self.current_token
@@ -89,7 +89,7 @@ class Parser:
         """Parse the comparisson expression.
 
         Returns:
-            method: The binary operation node.
+            ParseResult: the comparisson expression syntax tree.
         """
         return self.bin_op(self.math_expr, self.comparisson_ops)
     
@@ -97,7 +97,7 @@ class Parser:
         """Parse the math expression.
 
         Returns:
-            method: The binary operation node.
+            ParseResult: The math expression syntax tree.
         """
         return self.bin_op(self.math_term, self.math_low_order_ops)
     
@@ -105,7 +105,7 @@ class Parser:
         """Parse the math term.
 
         Returns:
-            method: The binary operation node.
+            ParseResult: The math term syntax tree.
         """
         return self.bin_op(self.math_factor, self.math_high_order_ops)
     
@@ -113,7 +113,7 @@ class Parser:
         """Parse the math factor.
 
         Returns:
-            method: the success of the parsing or the error.
+            ParseResult: The math factor syntax tree.
         """
         res = ParseResult()
         tok = self.current_token
@@ -129,10 +129,10 @@ class Parser:
             return res.success(call)
        
     def identifer(self):
-        """Parse the identifer.
+        """Parse the identifer expression.
 
         Returns:
-            method: the success or feilure of the parsing.
+            ParseResult: The identifer node (SymbolAcsessNode)
         """
         res = ParseResult()
         tok = self.current_token
@@ -143,10 +143,10 @@ class Parser:
         return res.failure(InvalidSyntaxError(tok.pos_start, self.current_token.pos_end, "Expected 'IDENTIFIER'")) 
         
     def atom(self):
-        """Parse the atom.
+        """Parse the atom expression.
 
         Returns:
-            method: the success or feilure of the parsing or the error.
+            ParseResult: the atom expression node (NumberNode, SymbolAcsessNode, or parentized expression)
         """
         res = ParseResult()
         tok = self.current_token
@@ -176,7 +176,7 @@ class Parser:
         """Parse the parentized expression.
 
         Returns:
-            method: the success or feilure of the parsing, or the error.
+            ParseResult: The parentized expression syntax tree.
         """
         res = ParseResult()
         tok = self.current_token
@@ -196,7 +196,7 @@ class Parser:
         """Parse the while expression.
 
         Returns:
-            method: the success or feilure of the parsing, or the error.
+            ParseResult: the while expression syntax tree.
         """
         res = ParseResult()
         tok = self.current_token
@@ -235,14 +235,14 @@ class Parser:
             return res.failure(InvalidSyntaxError(tok.pos_start, self.current_token.pos_end, "Expected '{'"))
     
     def bin_op(self, func, ops):
-        """Parse the binary operation.
+        """Parse the binary operation syntax.
 
         Args:
-            func (method): the function to parse.
-            ops (tokens): the tokens to parse.
+            func (method): the expression to parse.
+            ops (Token[]): the operation tokens to parse.
 
         Returns:
-            method: the success of the parsing or the error.
+            ParseResult: The binary operation syntax tree.
         """
         res = ParseResult()
         left = res.register(func())
@@ -258,14 +258,12 @@ class Parser:
         return res.success(left)
     
     def parameters(self):
-        """Parse the parameters.
+        """Parse the function parameters.
 
         Returns:
-            method: the success of the parsing or the error.
+            ParseResult: the function parameters (BaseNode[]).
         """
         res = ParseResult()
-        # res.register_advancement()
-        # self.advance()
         more_then_one = False
         parameters = []
         
@@ -292,14 +290,12 @@ class Parser:
         return res.success(parameters)
             
     def arguments(self):
-        """Parse the arguments.
+        """Parse the function arguments.
 
         Returns:
-            method: the success of the parsing or the error.
+            ParseResult: the function arguments (BaseNode[]).
         """
         res = ParseResult()
-        # res.register_advancement()
-        # self.advance()
         more_then_one = False
         arguments = []
         
@@ -329,7 +325,7 @@ class Parser:
         """Parse the function definition.
 
         Returns:
-            method: the success or feilure of the parsing, or the error.
+            ParseResult: the function definition syntax tree.
         """
         res = ParseResult()
         tok = self.current_token
@@ -411,7 +407,7 @@ class Parser:
         """Parse the function call.
 
         Returns:
-           method: the success or feilure of the parsing, or the error.
+           ParseResult: the function call syntax tree.
         """
         res = ParseResult()
         atom = res.register(self.atom())
@@ -425,8 +421,6 @@ class Parser:
                 return res.success(FuncCallNode(atom, []))
             else:
                 tok = self.current_token
-                # res.register_advancement()
-                # self.advance()
                 arg = res.register(self.arguments())
                 if res.error:return res
                 if self.current_token.type == Tokens.RPAREN:
@@ -438,13 +432,13 @@ class Parser:
         return res.success(atom)
             
     def statements(self, isInsideFunc):
-        """Parse the statements.
+        """Parse the multiple statements.
 
         Args:
             isInsideFunc (bool): check if the statement is inside a function.
 
         Returns:
-            method: the success of the parsing or the error.
+            List: the list of statements (BaseNode[]).
         """
         res = ParseResult()
         statements = []
@@ -480,13 +474,13 @@ class Parser:
         return res.success(statements)
 
     def return_expr(self, isInsideFunc):
-        """Parse the return expression.
+        """Parse the return expression syntax.
 
         Args:
             isInsideFunc (bool): check if the statement is inside a function.
 
         Returns:
-            method: the success or feilure of the parsing, or the error.
+            ParseResult: the return expression Node.
         """
         res = ParseResult()
         tok = self.current_token
@@ -511,10 +505,10 @@ class Parser:
             return res.failure(InvalidSyntaxError(tok.pos_start, self.current_token.pos_end, "Expected 'return'"))
 
     def continue_expr(self):
-        """Parse the continue expression.
+        """Parse the continue expression syntax.
 
         Returns:
-            method: the success or feilure of the parsing, or the error.
+            ParseResult: the continue expression Node.
         """
         res = ParseResult()
         tok = self.current_token
@@ -529,10 +523,10 @@ class Parser:
             return res.failure(InvalidSyntaxError(tok.pos_start, self.current_token.pos_end, "Expected 'continue'"))
 
     def break_expr(self):
-        """Parse the break expression.
+        """Parse the break expression syntax.
 
         Returns:
-            method: the success or feilure of the parsing, or the error.
+            ParseResult: the break expression Node.
         """
         res = ParseResult()
         tok = self.current_token
@@ -548,15 +542,14 @@ class Parser:
             return res.failure(InvalidSyntaxError(tok.pos_start, self.current_token.pos_end, "Expected 'Break'"))
          
     def statement(self, isInsideFunc):
-        """Parse the statement.
+        """Parse a statement syntax.
 
         Args:
             isInsideFunc (bool): check if the statement is inside a function.
 
         Returns:
-            method: the return or break or continue or the boolean expression.
+            ParseResult: the statement syntax tree.
         """
-        #res = ParseResult()
         tok = self.current_token
         if tok.matches(Tokens.KEYWORD, Tokens.RETURN):
             return self.return_expr(isInsideFunc)
@@ -566,27 +559,3 @@ class Parser:
             return self.break_expr()
         else:
             return self.bool_expr()
-# class ParseResult:
-    
-#     def __init__(self):
-#         self.error = None
-#         self.node = None
-#         self.advance_count = 0
-    
-#     def register(self, res):
-#         self.advance_count += res.advance_count
-#         if res.error: self.error = res.error
-#         return res.node
-    
-#     def register_advancement(self):
-#         self.advance_count += 1
-#         return self
-    
-#     def success(self, node):
-#         self.node = node
-#         return self
-    
-#     def failure(self, error):
-#         if not self.error or self.advance_count == 0:
-#             self.error = error
-#         return self
