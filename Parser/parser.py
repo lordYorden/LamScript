@@ -4,6 +4,7 @@ from Error.Error import InvalidSyntaxError
 from Parser.ParseResult import ParseResult
 
 class Parser:
+    """Class that contains the parser for the language."""
     parenthesis = (Tokens.LPAREN, Tokens.RPAREN)
     math_low_order_ops = (Tokens.ADD, Tokens.SUB)
     math_high_order_ops = (Tokens.MUL, Tokens.DIV, Tokens.IDIV, Tokens.MOD)
@@ -12,30 +13,60 @@ class Parser:
     comparisson_ops = (Tokens.LESS, Tokens.LESSE, Tokens.GREATER, Tokens.GREATERE, Tokens.EQUEL, Tokens.NEQUEL)
     
     def __init__(self, tokens):
+        """The parser class that contains the parser for the language.
+
+        Args:
+            tokens (token): the tokens to parse.
+        """
         self.tokens = tokens
         self.token_index = -1
         self.advance()
         self.isInsideLoop = False
         
     def advance(self):
+        """Move the current token to the next token.
+
+        Returns:
+            token: the current token.
+        """
         self.token_index += 1
         if self.token_index < len(self.tokens):
             self.current_token = self.tokens[self.token_index]
         return self.current_token
     
     def parse(self):
+        """Parse the tokens and return the result.
+
+        Returns:
+            token: the result of the parsing or the error.
+        """
         res = self.statements(False)
         if not res.error and self.current_token.type != Tokens.EOF:
             return res.failure(InvalidSyntaxError(self.current_token.pos_start, self.current_token.pos_end, "Unkonwn operation for type"))
         return res
     
     def bool_expr(self):
+        """Parse the boolean expression.
+
+        Returns:
+            method: the boolean operation.
+        """
         return self.bin_op(self.bool_term, self.bool_low_order_ops)
     
     def bool_term(self):
+        """Parse the boolean term.
+
+        Returns:
+            method: the boolean operation.
+        """
         return self.bin_op(self.bool_factor, self.equel_ops)
     
     def bool_factor(self):
+        """Parse the boolean factor.
+
+        Returns:
+            method: the success of the parsing or the error.
+        """
         res = ParseResult()
         tok = self.current_token
         
@@ -55,15 +86,35 @@ class Parser:
             return res.success(comp)
     
     def comparisson_expr(self): 
+        """Parse the comparisson expression.
+
+        Returns:
+            method: The binary operation node.
+        """
         return self.bin_op(self.math_expr, self.comparisson_ops)
     
     def math_expr(self):
+        """Parse the math expression.
+
+        Returns:
+            method: The binary operation node.
+        """
         return self.bin_op(self.math_term, self.math_low_order_ops)
     
     def math_term(self):
+        """Parse the math term.
+
+        Returns:
+            method: The binary operation node.
+        """
         return self.bin_op(self.math_factor, self.math_high_order_ops)
     
     def math_factor(self):
+        """Parse the math factor.
+
+        Returns:
+            method: the success of the parsing or the error.
+        """
         res = ParseResult()
         tok = self.current_token
         if tok.type in self.math_low_order_ops:
@@ -78,6 +129,11 @@ class Parser:
             return res.success(call)
        
     def identifer(self):
+        """Parse the identifer.
+
+        Returns:
+            method: the success or feilure of the parsing.
+        """
         res = ParseResult()
         tok = self.current_token
         if tok.type == Tokens.IDENTIFIER:
@@ -87,6 +143,11 @@ class Parser:
         return res.failure(InvalidSyntaxError(tok.pos_start, self.current_token.pos_end, "Expected 'IDENTIFIER'")) 
         
     def atom(self):
+        """Parse the atom.
+
+        Returns:
+            method: the success or feilure of the parsing or the error.
+        """
         res = ParseResult()
         tok = self.current_token
         if tok.type == Tokens.INT:
@@ -112,6 +173,11 @@ class Parser:
         return res.failure(InvalidSyntaxError(tok.pos_start, self.current_token.pos_end, "Expected '(, int, or while, def or lite'"))
     
     def parentized_expr(self):
+        """Parse the parentized expression.
+
+        Returns:
+            method: the success or feilure of the parsing, or the error.
+        """
         res = ParseResult()
         tok = self.current_token
         res.register_advancement()
@@ -127,6 +193,11 @@ class Parser:
             return res.failure(InvalidSyntaxError(tok.pos_start, self.current_token.pos_end, "Expected ')'"))
          
     def while_expr(self):
+        """Parse the while expression.
+
+        Returns:
+            method: the success or feilure of the parsing, or the error.
+        """
         res = ParseResult()
         tok = self.current_token
             
@@ -164,6 +235,15 @@ class Parser:
             return res.failure(InvalidSyntaxError(tok.pos_start, self.current_token.pos_end, "Expected '{'"))
     
     def bin_op(self, func, ops):
+        """Parse the binary operation.
+
+        Args:
+            func (method): the function to parse.
+            ops (tokens): the tokens to parse.
+
+        Returns:
+            method: the success of the parsing or the error.
+        """
         res = ParseResult()
         left = res.register(func())
         if res.error: return res
@@ -178,6 +258,11 @@ class Parser:
         return res.success(left)
     
     def parameters(self):
+        """Parse the parameters.
+
+        Returns:
+            method: the success of the parsing or the error.
+        """
         res = ParseResult()
         # res.register_advancement()
         # self.advance()
@@ -207,6 +292,11 @@ class Parser:
         return res.success(parameters)
             
     def arguments(self):
+        """Parse the arguments.
+
+        Returns:
+            method: the success of the parsing or the error.
+        """
         res = ParseResult()
         # res.register_advancement()
         # self.advance()
@@ -236,6 +326,11 @@ class Parser:
         return res.success(arguments)
   
     def function_def(self):
+        """Parse the function definition.
+
+        Returns:
+            method: the success or feilure of the parsing, or the error.
+        """
         res = ParseResult()
         tok = self.current_token
         if tok.matches(Tokens.KEYWORD , Tokens.DEF):
@@ -313,6 +408,11 @@ class Parser:
             return res.failure(InvalidSyntaxError(tok.pos_start, self.current_token.pos_end, "Expected 'def' or 'lite'"))
                     
     def call(self):
+        """Parse the function call.
+
+        Returns:
+           method: the success or feilure of the parsing, or the error.
+        """
         res = ParseResult()
         atom = res.register(self.atom())
         if res.error: return res
@@ -338,6 +438,14 @@ class Parser:
         return res.success(atom)
             
     def statements(self, isInsideFunc):
+        """Parse the statements.
+
+        Args:
+            isInsideFunc (bool): check if the statement is inside a function.
+
+        Returns:
+            method: the success of the parsing or the error.
+        """
         res = ParseResult()
         statements = []
         pos_start = self.current_token.pos_start.copy()
@@ -372,6 +480,14 @@ class Parser:
         return res.success(statements)
 
     def return_expr(self, isInsideFunc):
+        """Parse the return expression.
+
+        Args:
+            isInsideFunc (bool): check if the statement is inside a function.
+
+        Returns:
+            method: the success or feilure of the parsing, or the error.
+        """
         res = ParseResult()
         tok = self.current_token
         if tok.matches(Tokens.KEYWORD, Tokens.RETURN):
@@ -395,6 +511,11 @@ class Parser:
             return res.failure(InvalidSyntaxError(tok.pos_start, self.current_token.pos_end, "Expected 'return'"))
 
     def continue_expr(self):
+        """Parse the continue expression.
+
+        Returns:
+            method: the success or feilure of the parsing, or the error.
+        """
         res = ParseResult()
         tok = self.current_token
         if tok.matches(Tokens.KEYWORD, Tokens.CONTINUE):
@@ -408,6 +529,11 @@ class Parser:
             return res.failure(InvalidSyntaxError(tok.pos_start, self.current_token.pos_end, "Expected 'continue'"))
 
     def break_expr(self):
+        """Parse the break expression.
+
+        Returns:
+            method: the success or feilure of the parsing, or the error.
+        """
         res = ParseResult()
         tok = self.current_token
         if tok.matches(Tokens.KEYWORD, Tokens.BREAK):
@@ -422,6 +548,14 @@ class Parser:
             return res.failure(InvalidSyntaxError(tok.pos_start, self.current_token.pos_end, "Expected 'Break'"))
          
     def statement(self, isInsideFunc):
+        """Parse the statement.
+
+        Args:
+            isInsideFunc (bool): check if the statement is inside a function.
+
+        Returns:
+            method: the return or break or continue or the boolean expression.
+        """
         #res = ParseResult()
         tok = self.current_token
         if tok.matches(Tokens.KEYWORD, Tokens.RETURN):
