@@ -4,6 +4,7 @@ from Error.Error import InvalidSyntaxError
 from Parser.ParseResult import ParseResult
 
 class Parser:
+    #define the order of operations
     parenthesis = (Tokens.LPAREN, Tokens.RPAREN)
     math_low_order_ops = (Tokens.ADD, Tokens.SUB)
     math_high_order_ops = (Tokens.MUL, Tokens.DIV, Tokens.IDIV, Tokens.MOD)

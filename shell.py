@@ -91,7 +91,7 @@ def run(fn, text):
             
             if run_line_by_line:
                 #print(node)
-                print(node.print_statement())
+                print(node.get_statement_text())
                 print("result: ", end="")
                 
             result = interpreter.visit(node, context)
