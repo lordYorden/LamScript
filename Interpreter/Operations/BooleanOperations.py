@@ -8,6 +8,8 @@ class BooleanOperation(BinaryOperation):
         super().__init__(op_token, left, right)
     
     def eval(self):
+        value, error = super().eval()
+        if error: return None, error
         return self.op_func(self.left, self.right), None
     
 class UnaryBooleanOperation(UnaryOperation):
@@ -15,6 +17,8 @@ class UnaryBooleanOperation(UnaryOperation):
         super().__init__(op_token, Object)
         
     def eval(self):
+        value, error = super().eval()
+        if error: return None, error
         return self.op_func(self.left), None
     
 class equels(BooleanOperation):

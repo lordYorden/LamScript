@@ -42,10 +42,10 @@ class Object:
         return object, None
 
     def find_bin_op(self, op_token):
-        pass
+        return None, TypeError(self.pos_start, self.pos_end, f"Unsupported operand type(s) for {op_token}: '{'None' if self == Object.none else self.__class__.__name__}'", self.context)
     
     def find_unary_op(self, op_token):
-        pass
+        return None, TypeError(self.pos_start, self.pos_end, f"Unsupported operand type(s) for {op_token}: '{'None' if self == Object.none else self.__class__.__name__}'", self.context)
     
     def find_op(self, op_token, operations):
         op = operations.get(op_token.type, None)
