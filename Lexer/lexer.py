@@ -3,6 +3,13 @@ from Error.Error import Position, IllegalCharacterError, ExpectedCharError
 
 class Lexer:
     def __init__(self, fn, text):
+        """The lexer class is responsible for converting the input text 
+           into tokens that the parser can understand.
+
+        Args:
+            fn (string): name of the file
+            text (string): file text
+        """
         self.fn = fn
         self.text = text
         self.pos = Position(-1, 0, -1, fn, text)
@@ -10,14 +17,21 @@ class Lexer:
         self.advance()
     
     def advance(self):
+        """Move the position of the current character by one character"""
         self.pos.advance(self.current_char)
         self.current_char = self.text[self.pos.index] if self.pos.index < len(self.text) else None
         
     def backtrack(self):
+        """Move the position of the current character back by one character"""
         self.pos.backtrack()
         self.current_char = self.text[self.pos.index] if self.pos.index < len(self.text) else None
     
     def make_tokens(self):
+        """Convert the input text into tokens that the parser can understand.
+
+        Returns:
+            token, None: list of tokens and no error
+        """
         tokens = []
         
         while self.current_char != None:
@@ -97,6 +111,11 @@ class Lexer:
         return tokens,None
     
     def make_number(self):
+        """Convert the input text into a number token.
+
+        Returns:
+            token: number token with the value of the number
+        """
         num_str = ''
         pos_start = self.pos.copy()
         
@@ -107,6 +126,11 @@ class Lexer:
         return Token(Tokens.INT, int(num_str), pos_start=pos_start, pos_end=self.pos)
     
     def make_whole_div(self):
+        """check if the current character is a division token.
+
+        Returns:
+            token: division token 
+        """
         pos_start = self.pos.copy()
         self.advance()
         if self.current_char == '/':
@@ -115,6 +139,11 @@ class Lexer:
         return Token(Tokens.DIV, pos_start=pos_start)
     
     def make_or(self):
+        """check if the current character is a or token.
+
+        Returns:
+            token: or token 
+        """
         pos_start = self.pos.copy()
         self.advance()
         if self.current_char == '|':
@@ -123,6 +152,11 @@ class Lexer:
             return None, ExpectedCharError(pos_start, self.pos, "'|'")
     
     def make_and(self):
+        """check if the current character is a and token.
+
+        Returns:
+            token: and token
+        """
         pos_start = self.pos.copy()
         self.advance()
         if self.current_char == '&':
@@ -131,6 +165,15 @@ class Lexer:
             return None, ExpectedCharError(pos_start, self.pos, "'&'")
     
     def make_equel(self, equel_token,alternative_token):
+        """check if the current character is a equel token.
+
+        Args:
+            equel_token (character): the equel token
+            alternative_token (character): the alternative token
+
+        Returns:
+            token: equel token or alternative token
+        """
         pos_start = self.pos.copy()
         self.advance()
         if self.current_char == '=':
@@ -139,6 +182,11 @@ class Lexer:
         return Token(alternative_token, pos_start=pos_start)
     
     def make_keyword_bool_identifier(self):
+        """Convert the input text into a keyword, boolean or identifier token.
+
+        Returns:
+            token: keyword, boolean or identifier token
+        """
         key_str = ''
         pos_start = self.pos.copy()
 
@@ -160,6 +208,7 @@ class Lexer:
         return Token(Tokens.IDENTIFIER, key_str, pos_start, self.pos)
     
     def ignore_comments(self):
+        """Ignore comments in the input text."""
         self.advance()
         while self.current_char != '\n':
             self.advance()
@@ -168,6 +217,11 @@ class Lexer:
     
     #deprecated
     def make_boolean(self):
+        """check if the current character is a boolean token.
+
+        Returns:
+            token: boolean token or None and an error
+        """
         bool_str = ''
         pos_start = self.pos.copy()
         
