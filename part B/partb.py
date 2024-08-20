@@ -1,8 +1,7 @@
 import functools
 
 def main():
-    
-    print(list(fib_gen(7)))
+    print(fib_gen(5))
     
     print(cat_strings_with(' ', 'The', 'quick', 'brown', 'fox', 'jumps', 'over', 'the', 'lazy', 'dog'))
     
@@ -16,8 +15,11 @@ def main():
     
     print(num_palindrom_in_list_of_lists([['101'], ['ac'], ['aca', 'bbaabb']]))
     
-    #todo
-    #Explain the term "lazy evaluation" in the context of the following program
+    #Explain the term "lazy evaluation" in the context of the following program:
+    #   in python lazy evaluation is the concept of evaluating the values only when the program "needs them".
+    #   in the program bellow this comes to affect as the squared_values are calculated using both methods.
+    #   in Eager evaluation the program rules it should calculate them immediately using the list cast.
+    #   and in Lazy evaluation the program only gives the list comprehension one value at a time using a generator function.
     print('Eager evaluation:')
     values = list(generate_values())
     squared_values = [square(x) for x in values]
@@ -29,11 +31,10 @@ def main():
     
     print(get_deceding_primes([1,3,4,7,11,2,23,71,6,12,80]))
 
-#todo
 def fib_gen(n):
     """Implement a Fibonacci sequence generator using a single lambda expression that
     returns a list of the first n Fibonacci numbers. The function should take n as an input"""
-    return (((lambda f: f(f, i))(lambda f, x: x if x < 2 else f(f, x-1) + f(f, x-2))) for i in range(n))
+    return list((lambda n: functools.reduce(lambda seq, _: seq + [seq[-1] + seq[-2]], range(2, n), [0, 1])[:n])(n))
     
 def cat_strings_with(delimiter=' ', *args):
     """Write the shortest Python program, that accepts a list of strings and return a
@@ -41,12 +42,11 @@ def cat_strings_with(delimiter=' ', *args):
     use the "join" function. Use lambda expressions. """
     return functools.reduce(lambda x, y: x + delimiter + y, args)
     
-#todo    
 def sum_of_squares(list_of_lists):
     """Write a Python function that takes a list of lists of numbers and return a new list
     containing the cumulative sum of squares of even numbers in each sublist. Use at
     least 5 nested lambda expressions in your solution"""
-    return functools.reduce(lambda x,y: x+y, map(lambda clean_num: clean_num**2, filter(lambda num: num%2==0, functools.reduce(lambda list1, list2: list1 + list2, list_of_lists))))
+    return [(lambda lists: functools.reduce(lambda x,y: x+y, map(lambda clean_num: clean_num**2, filter(lambda num: num%2==0, functools.reduce(lambda list1, list2: list1 + list2, lists)))))(list_of_lists)]
     
 def apply_on_list(bin_op):
     """Write a higher-order function that takes a binary operation (as a lambda function)
@@ -88,7 +88,6 @@ def num_palindrom_in_list_of_lists(list_of_lists):
     # num_palindroms = lambda list1: len(list(filter(lambda string: (string == ''.join([c for c in string[::-1]])), list1)))
     return [len(list(filter(lambda string: (string == ''.join([c for c in string[::-1]])), list1))) for list1 in list_of_lists]
 
-#todo
 def generate_values():
     print('Generating values...')
     yield 1
