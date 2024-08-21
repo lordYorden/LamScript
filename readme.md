@@ -4,6 +4,10 @@ An interpreter for a simple functional programming language
 that emphasizes function definitions and lambda expressions, without
 variable assignments or mutable state.
 
+**Created by:**
+- [@Yarden Perets](https://github.com/lordYorden) 
+- [@Gal Deri](https://github.com/galDeri23)
+
 ###### This project was inspired by [@CodePulse&#39;s](https://www.youtube.com/@CodePulse) Series: **Make YOUR OWN Programming Language**.
 
 ## Data Types:
