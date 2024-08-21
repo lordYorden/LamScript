@@ -66,5 +66,6 @@ print(false && true)
 print(true || false)
 print(!true)
 
-#lite(lambda) test Function composition in mul by zero
+#lite(lambda) test Function composition in div by zero
+#demo error handling
 print((lite (x,y) x/y)((lite(x,y) x/y)(4,5),0))
