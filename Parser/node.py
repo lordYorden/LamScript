@@ -101,6 +101,7 @@ class UnaryOpNode(BaseNode):
             op_token (token): The token of the operation.
             node (node): The node of the operation.
         """
+        super().__init__(op_token.pos_start, node.pos_end)
         self.op_token = op_token
         self.node = node
 
