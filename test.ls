@@ -2,7 +2,7 @@ def hi(x,y) { return x+y }
 
 def mul(x,y) { return x*y }
 
-def bool(x,y) {return x==y }
+def equel(x,y) {return x==y }
 
 def fact(n) {
     return (n == 0) || (n * fact(n - 1))
@@ -17,16 +17,25 @@ while (true){
     break
 }
 
-lite (x,y) {x/y}
-
 #this is a comment
-print(lite(48,4))
-print(lite(lite(10,2),0))
+
+#lite(lambda) Function test of mul
+print((lite (x,y) {x/y})(48,4))
+
+#lite(lambda) test Function composition in mul by zero
+print(lite((x,y) {x/y})(lite((x,y) {x/y})(4,5),0))
+
+#Recursion test
 print(fib(5))
 print(fact(3))
-print(bool(4,4))
-print(bool(4,5))
-print(mul(4,5))
+
+#Function test of equel
+print(equel(4,4))
+print(equel(4,5))
+
+#Function test of add
 print(hi(4,2))
+
+#test Function composition
 print(hi(hi(3,4),5))
 
