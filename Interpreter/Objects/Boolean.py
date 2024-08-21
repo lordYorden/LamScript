@@ -26,24 +26,24 @@ class Boolean(Object):
         super().__init__(value)
         
     def find_bin_op(self, op_token):
-        """finds the binary operation
+        """overides the find_bin_op method in the Object class
 
         Args:
             op_token (token): the token of the operation
 
         Returns:
-            method: the find operation method
+            BineryOperation: the binary operation that matches the op_token
         """
         return self.find_op(op_token, self.bin_operations)
         
     def find_unary_op(self, op_token):
-        """finds the unary operation
+        """overides the find_unary_op method in the Object class
 
         Args:
             op_token (token): the token of the operation
 
         Returns:
-            method: the find operation method
+            UnaryOperation: the unary operation that matches the op_token
         """
         return self.find_op(op_token, self.unary_operations)
     
