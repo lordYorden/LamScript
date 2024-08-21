@@ -9,8 +9,18 @@ def fact(n) {
 } 
 
 def fib(n) {
-    return ((n==0) || (n==1)) || (fib(n-1) + fib(n-2))
+    return ((n == 0) || (n == 1)) || (fib(n-1) + fib(n-2))
 }
+
+def fact_nsc(n) {
+    while (n == 0) {
+        return 1
+    }
+    return n * fact_nsc(n - 1)
+}
+
+#Recursion without short-circut
+print(fact_nsc(3))
 
 while (true){
     print(3)

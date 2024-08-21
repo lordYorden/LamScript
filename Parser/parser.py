@@ -23,6 +23,7 @@ class Parser:
         self.token_index = -1
         self.advance()
         self.isInsideLoop = False
+        self.isInsideFunc = False
         
     def advance(self):
         """Move the current token to the next token.
@@ -41,7 +42,7 @@ class Parser:
         Returns:
             ParseResult: the result of the parsing.
         """
-        res = self.statements(False)
+        res = self.statements()
         if not res.error and self.current_token.type != Tokens.EOF:
             return res.failure(InvalidSyntaxError(self.current_token.pos_start, self.current_token.pos_end, "Unkonwn operation for type"))
         return res
@@ -218,10 +219,10 @@ class Parser:
             if self.current_token.type == Tokens.NEWLINE:
                 res.register_advancement()
                 self.advance()
-                body_nodes =  res.register(self.statements(False))
+                body_nodes =  res.register(self.statements())
                 if res.error: return res
             else:
-                expr = res.register(self.statement(False))
+                expr = res.register(self.statement())
                 if res.error: return res
                 body_nodes.append(expr)
             
@@ -353,15 +354,16 @@ class Parser:
                         tok = self.current_token
                         res.register_advancement()
                         self.advance()
+                        self.isInsideFunc = True
                        
                         body_nodes = []
                         if self.current_token.type == Tokens.NEWLINE:
                             res.register_advancement()
                             self.advance()
-                            body_nodes =  res.register(self.statements(True))
+                            body_nodes =  res.register(self.statements())
                             if res.error: return res
                         else:
-                            expr = res.register(self.statement(True))
+                            expr = res.register(self.statement())
                             if res.error: return res
                             body_nodes.append(expr)
 
@@ -369,6 +371,7 @@ class Parser:
                             res.register_advancement()
                             self.advance()
                             
+                            self.isInsideFunc = False
                             return res.success(FuncDefNode(id, params, body_nodes, False, self.current_token.pos_end))
                         else:
                             return res.failure(InvalidSyntaxError(tok.pos_start, self.current_token.pos_end, "Expected '}'"))
@@ -396,10 +399,10 @@ class Parser:
                         self.advance()
                         res.register_advancement()
 
-                        body = res.register(self.statement(False))
+                        self.isInsideFunc = True
+                        body = res.register(self.statement())
                         if res.error: return res
-
-                        
+                        self.isInsideFunc = False
                         return res.success(FuncDefNode(id, params, [body], True))
                     else:
                         return res.failure(InvalidSyntaxError(tok.pos_start, self.current_token.pos_end, "Expected ')'"))  
@@ -436,11 +439,8 @@ class Parser:
                     return res.failure(InvalidSyntaxError(tok.pos_start, self.current_token.pos_end, "Expected ')'"))
         return res.success(atom)
             
-    def statements(self, isInsideFunc):
+    def statements(self):
         """Parse the multiple statements.
-
-        Args:
-            isInsideFunc (bool): check if the statement is inside a function.
 
         Returns:
             List: the list of statements (BaseNode[]).
@@ -453,7 +453,7 @@ class Parser:
             res.register_advancement()
             self.advance()
             
-        statement = res.register(self.statement(isInsideFunc))
+        statement = res.register(self.statement())
         if res.error: return res
         statements.append(statement)
         
@@ -468,7 +468,7 @@ class Parser:
             if self.current_token.type == Tokens.RBRCE:
                 break
             
-            statement = res.register(self.statement(isInsideFunc))
+            statement = res.register(self.statement())
             if res.error: return res
             statements.append(statement)
             
@@ -478,12 +478,9 @@ class Parser:
             
         return res.success(statements)
 
-    def return_expr(self, isInsideFunc):
+    def return_expr(self):
         """Parse the return expression syntax.
-
-        Args:
-            isInsideFunc (bool): check if the statement is inside a function.
-
+ 
         Returns:
             ParseResult: the return expression Node.
         """
@@ -494,7 +491,7 @@ class Parser:
             self.advance()
             
             if self.current_token.type == Tokens.NEWLINE:
-                if isInsideFunc:
+                if self.isInsideFunc:
                     return res.success(ReturnNode(None, tok.pos_start, tok.pos_end))
                 else:
                     return res.failure(InvalidSyntaxError(tok.pos_start, self.current_token.pos_end, "return statement outside function"))
@@ -502,7 +499,7 @@ class Parser:
                 expr = res.register(self.bool_expr())
                 if res.error: return res
                 
-                if isInsideFunc:
+                if self.isInsideFunc:
                     return res.success(ReturnNode(expr, tok.pos_start, self.current_token.pos_end))
                 else:
                     return res.failure(InvalidSyntaxError(tok.pos_start, self.current_token.pos_end, "return statement outside function"))
@@ -546,18 +543,15 @@ class Parser:
         else:
             return res.failure(InvalidSyntaxError(tok.pos_start, self.current_token.pos_end, "Expected 'Break'"))
          
-    def statement(self, isInsideFunc):
+    def statement(self):
         """Parse a statement syntax.
-
-        Args:
-            isInsideFunc (bool): check if the statement is inside a function.
 
         Returns:
             ParseResult: the statement syntax tree.
         """
         tok = self.current_token
         if tok.matches(Tokens.KEYWORD, Tokens.RETURN):
-            return self.return_expr(isInsideFunc)
+            return self.return_expr()
         elif tok.matches(Tokens.KEYWORD, Tokens.CONTINUE):
             return self.continue_expr()
         elif tok.matches(Tokens.KEYWORD, Tokens.BREAK):

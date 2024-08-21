@@ -144,7 +144,7 @@ class Interpreter:
             condition_value = res.register(self.visit(node.condition_node, context))
             if res.error: return res.failure(res.error)
             
-            if not condition_value:
+            if not condition_value.value:
                 break
             
             continue_loop = False
