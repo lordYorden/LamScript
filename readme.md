@@ -5,10 +5,25 @@ that emphasizes function definitions and lambda expressions, without
 variable assignments or mutable state.
 
 **Created by:**
-- [@Yarden Perets](https://github.com/lordYorden) 
+
+- [@Yarden Perets](https://github.com/lordYorden)
 - [@Gal Deri](https://github.com/galDeri23)
 
 ###### This project was inspired by [@CodePulse&#39;s](https://www.youtube.com/@CodePulse) Series: **Make YOUR OWN Programming Language**.
+
+## How to Run:
+
+- Clone the repository
+- Run the following command in the terminal:
+
+  ```shell
+  py shell.py [-l] [<your file name>.ls]
+  ```
+- The `-l` flag is **optional** and is used to run the interpreter in line by line mode.
+- The `<your file name>.ls` is the file you want to run, also **optional**.
+  if the shell.py dosen't get any arguments, it will run in the interactive mode.
+
+#### For syntax example and Capability test, we provided `test.ls` file.
 
 ## Data Types:
 
@@ -138,8 +153,9 @@ variable assignments or mutable state.
   - Newline plays a key role in how statements are separated. The presence of `NEWLINE*` and `NEWLINE+` indicates that line breaks are important for statement separation.
 
 #### 3. Boolean Expressions
+
 - **`<bool_expr>`**:
-  - Boolean expressions can be composed of multiple terms, we used the `<bool_expr>` to define the base expression. That came to be when we realized That arithmetic operations uses `<Comparission expr>` as the base expression, which gives a boolean value. like in the following expression: 
+  - Boolean expressions can be composed of multiple terms, we used the `<bool_expr>` to define the base expression. That came to be when we realized That arithmetic operations uses `<Comparission expr>` as the base expression, which gives a boolean value. like in the following expression:
     ```
     !(true) || x < 3
     ```
@@ -178,5 +194,6 @@ variable assignments or mutable state.
   - Function calls and definitions allow for optional arguments and parameters, providing flexibility in how functions are written and invoked.
 
 #### 8. Keywords
+
 - **`<keywords>`**:
-    - We decided to chnage conventional keywords. For example: `lite` **instead of** `lambda` to make the language more unique. but still, we kept the `while` is order to fit with the language design standards.
+  - We decided to chnage conventional keywords. For example: `lite` **instead of** `lambda` to make the language more unique. but still, we kept the `while` is order to fit with the language design standards.
