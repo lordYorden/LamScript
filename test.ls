@@ -44,5 +44,27 @@ print(hi(4,2))
 #test Function composition
 print(hi(hi(3,4),5))
 
+#operation test
+
+#arithmatic operation
+print(3+4)
+print(3-4)
+print(3*4)
+print(5/2)
+print(3%1)
+
+#logical operation
+print(3 == 4)
+print(3 != 4)
+print(3 > 4)
+print(3 < 4)
+print(4 >= 4)
+print(3 <= 3)
+
+#conditional operation
+print(false && true)
+print(true || false)
+print(!true)
+
 #lite(lambda) test Function composition in mul by zero
 print((lite (x,y) x/y)((lite(x,y) x/y)(4,5),0))
