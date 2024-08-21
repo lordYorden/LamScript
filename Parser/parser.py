@@ -383,6 +383,8 @@ class Parser:
             res.register_advancement()
             self.advance()
             if self.current_token.type == Tokens.LPAREN:
+                #sets the identifier to none
+                id = SymbolAcsessNode(Token(Tokens.IDENTIFIER, "none", tok.pos_start, tok.pos_end))
                 tok = self.current_token
                 res.register_advancement()
                 self.advance()
@@ -396,7 +398,9 @@ class Parser:
 
                         body = res.register(self.statement(False))
                         if res.error: return res
-                        return res.success(FuncDefNode(None, params, [body], True))
+
+                        
+                        return res.success(FuncDefNode(id, params, [body], True))
                     else:
                         return res.failure(InvalidSyntaxError(tok.pos_start, self.current_token.pos_end, "Expected ')'"))  
             else:

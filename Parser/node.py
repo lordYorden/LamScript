@@ -180,6 +180,10 @@ class FuncDefNode(BaseNode):
         """
         super().__init__(identifier_node.pos_start, identifier_node.pos_end)
         self.identifier_token = identifier_node.identifier_token if identifier_node else None
+        
+        if self.identifier_token.matches(Tokens.IDENTIFIER, 'none'):
+            self.identifier_token = None
+            
         self.arg_nodes = arg_nodes
         self.body_nodes = body_nodes
         self.auto_return = auto_return

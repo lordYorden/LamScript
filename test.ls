@@ -17,13 +17,8 @@ while (true){
     break
 }
 
-#this is a comment
-
 #lite(lambda) Function test of mul
-print((lite (x,y) {x/y})(48,4))
-
-#lite(lambda) test Function composition in mul by zero
-print(lite((x,y) {x/y})(lite((x,y) {x/y})(4,5),0))
+print((lite (x,y) x/y)(48,4))
 
 #Recursion test
 print(fib(5))
@@ -39,3 +34,5 @@ print(hi(4,2))
 #test Function composition
 print(hi(hi(3,4),5))
 
+#lite(lambda) test Function composition in mul by zero
+print((lite (x,y) x/y)((lite(x,y) x/y)(4,5),0))

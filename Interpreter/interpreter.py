@@ -63,7 +63,7 @@ class Interpreter:
     
     def visit_BinOpNode(self, node, context):
         """Visits a Binary Operation Node
-        Handles lazy evaluation for the OR and AND operators
+        Handles Short-circuit evaluation for the OR and AND operators
 
         Args:
             node (BaseNode): the node to visit
