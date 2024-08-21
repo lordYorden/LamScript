@@ -34,7 +34,7 @@
             | lite ( <params>? ) <bool_expr>
 
 <params> := <identifier> (, <identifier>)*
-<argument> := <expr> (, <expr>)*
+<argument> := <bool_expr> (, <bool_expr>)*
 
 <int> :=  <non_zero_dig> <int> | <non_zero_dig> | 0
 <non_zero_dig> := 1..9

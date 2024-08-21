@@ -4,6 +4,7 @@ from Error.Error import InvalidSyntaxError
 from Parser.ParseResult import ParseResult
 
 class Parser:
+    #define the order of operations
     parenthesis = (Tokens.LPAREN, Tokens.RPAREN)
     math_low_order_ops = (Tokens.ADD, Tokens.SUB)
     math_high_order_ops = (Tokens.MUL, Tokens.DIV, Tokens.IDIV, Tokens.MOD)
@@ -12,30 +13,62 @@ class Parser:
     comparisson_ops = (Tokens.LESS, Tokens.LESSE, Tokens.GREATER, Tokens.GREATERE, Tokens.EQUEL, Tokens.NEQUEL)
     
     def __init__(self, tokens):
+        """The parser class that follows the languege grammar.
+        Layed out in grammer.txt
+
+        Args:
+            tokens (Token[]): The lexer tokens to parse.
+        """
         self.tokens = tokens
         self.token_index = -1
         self.advance()
         self.isInsideLoop = False
+        self.isInsideFunc = False
         
     def advance(self):
+        """Move the current token to the next token.
+
+        Returns:
+            Token: the next token.
+        """
         self.token_index += 1
         if self.token_index < len(self.tokens):
             self.current_token = self.tokens[self.token_index]
         return self.current_token
     
     def parse(self):
-        res = self.statements(False)
+        """Parse the tokens and return the Abstract Syntax Tree.
+
+        Returns:
+            ParseResult: the result of the parsing.
+        """
+        res = self.statements()
         if not res.error and self.current_token.type != Tokens.EOF:
             return res.failure(InvalidSyntaxError(self.current_token.pos_start, self.current_token.pos_end, "Unkonwn operation for type"))
         return res
     
     def bool_expr(self):
+        """Parse the boolean expression.
+
+        Returns:
+            ParseResult: the boolean expression syntax tree.
+        """
         return self.bin_op(self.bool_term, self.bool_low_order_ops)
     
     def bool_term(self):
+        """Parse the boolean term.
+
+        Returns:
+            ParseResult: the boolean term syntax tree.
+        """
         return self.bin_op(self.bool_factor, self.equel_ops)
     
     def bool_factor(self):
+        """Parse the boolean factor.
+
+        Returns:
+            ParseResult: the boolean factor syntax tree.
+        """
         res = ParseResult()
         tok = self.current_token
         
@@ -55,15 +88,35 @@ class Parser:
             return res.success(comp)
     
     def comparisson_expr(self): 
+        """Parse the comparisson expression.
+
+        Returns:
+            ParseResult: the comparisson expression syntax tree.
+        """
         return self.bin_op(self.math_expr, self.comparisson_ops)
     
     def math_expr(self):
+        """Parse the math expression.
+
+        Returns:
+            ParseResult: The math expression syntax tree.
+        """
         return self.bin_op(self.math_term, self.math_low_order_ops)
     
     def math_term(self):
+        """Parse the math term.
+
+        Returns:
+            ParseResult: The math term syntax tree.
+        """
         return self.bin_op(self.math_factor, self.math_high_order_ops)
     
     def math_factor(self):
+        """Parse the math factor.
+
+        Returns:
+            ParseResult: The math factor syntax tree.
+        """
         res = ParseResult()
         tok = self.current_token
         if tok.type in self.math_low_order_ops:
@@ -78,6 +131,11 @@ class Parser:
             return res.success(call)
        
     def identifer(self):
+        """Parse the identifer expression.
+
+        Returns:
+            ParseResult: The identifer node (SymbolAcsessNode)
+        """
         res = ParseResult()
         tok = self.current_token
         if tok.type == Tokens.IDENTIFIER:
@@ -87,6 +145,11 @@ class Parser:
         return res.failure(InvalidSyntaxError(tok.pos_start, self.current_token.pos_end, "Expected 'IDENTIFIER'")) 
         
     def atom(self):
+        """Parse the atom expression.
+
+        Returns:
+            ParseResult: the atom expression node (NumberNode, SymbolAcsessNode, or parentized expression)
+        """
         res = ParseResult()
         tok = self.current_token
         if tok.type == Tokens.INT:
@@ -112,6 +175,11 @@ class Parser:
         return res.failure(InvalidSyntaxError(tok.pos_start, self.current_token.pos_end, "Expected '(, int, or while, def or lite'"))
     
     def parentized_expr(self):
+        """Parse the parentized expression.
+
+        Returns:
+            ParseResult: The parentized expression syntax tree.
+        """
         res = ParseResult()
         tok = self.current_token
         res.register_advancement()
@@ -127,6 +195,11 @@ class Parser:
             return res.failure(InvalidSyntaxError(tok.pos_start, self.current_token.pos_end, "Expected ')'"))
          
     def while_expr(self):
+        """Parse the while expression.
+
+        Returns:
+            ParseResult: the while expression syntax tree.
+        """
         res = ParseResult()
         tok = self.current_token
             
@@ -146,10 +219,10 @@ class Parser:
             if self.current_token.type == Tokens.NEWLINE:
                 res.register_advancement()
                 self.advance()
-                body_nodes =  res.register(self.statements(False))
+                body_nodes =  res.register(self.statements())
                 if res.error: return res
             else:
-                expr = res.register(self.statement(False))
+                expr = res.register(self.statement())
                 if res.error: return res
                 body_nodes.append(expr)
             
@@ -164,6 +237,15 @@ class Parser:
             return res.failure(InvalidSyntaxError(tok.pos_start, self.current_token.pos_end, "Expected '{'"))
     
     def bin_op(self, func, ops):
+        """Parse the binary operation syntax.
+
+        Args:
+            func (method): the expression to parse.
+            ops (Token[]): the operation tokens to parse.
+
+        Returns:
+            ParseResult: The binary operation syntax tree.
+        """
         res = ParseResult()
         left = res.register(func())
         if res.error: return res
@@ -178,9 +260,12 @@ class Parser:
         return res.success(left)
     
     def parameters(self):
+        """Parse the function parameters.
+
+        Returns:
+            ParseResult: the function parameters (BaseNode[]).
+        """
         res = ParseResult()
-        # res.register_advancement()
-        # self.advance()
         more_then_one = False
         parameters = []
         
@@ -207,9 +292,12 @@ class Parser:
         return res.success(parameters)
             
     def arguments(self):
+        """Parse the function arguments.
+
+        Returns:
+            ParseResult: the function arguments (BaseNode[]).
+        """
         res = ParseResult()
-        # res.register_advancement()
-        # self.advance()
         more_then_one = False
         arguments = []
         
@@ -236,6 +324,11 @@ class Parser:
         return res.success(arguments)
   
     def function_def(self):
+        """Parse the function definition.
+
+        Returns:
+            ParseResult: the function definition syntax tree.
+        """
         res = ParseResult()
         tok = self.current_token
         if tok.matches(Tokens.KEYWORD , Tokens.DEF):
@@ -261,15 +354,16 @@ class Parser:
                         tok = self.current_token
                         res.register_advancement()
                         self.advance()
+                        self.isInsideFunc = True
                        
                         body_nodes = []
                         if self.current_token.type == Tokens.NEWLINE:
                             res.register_advancement()
                             self.advance()
-                            body_nodes =  res.register(self.statements(True))
+                            body_nodes =  res.register(self.statements())
                             if res.error: return res
                         else:
-                            expr = res.register(self.statement(True))
+                            expr = res.register(self.statement())
                             if res.error: return res
                             body_nodes.append(expr)
 
@@ -277,6 +371,7 @@ class Parser:
                             res.register_advancement()
                             self.advance()
                             
+                            self.isInsideFunc = False
                             return res.success(FuncDefNode(id, params, body_nodes, False, self.current_token.pos_end))
                         else:
                             return res.failure(InvalidSyntaxError(tok.pos_start, self.current_token.pos_end, "Expected '}'"))
@@ -291,6 +386,8 @@ class Parser:
             res.register_advancement()
             self.advance()
             if self.current_token.type == Tokens.LPAREN:
+                #sets the identifier to none
+                id = SymbolAcsessNode(Token(Tokens.IDENTIFIER, "none", tok.pos_start, tok.pos_end))
                 tok = self.current_token
                 res.register_advancement()
                 self.advance()
@@ -302,9 +399,11 @@ class Parser:
                         self.advance()
                         res.register_advancement()
 
-                        body = res.register(self.statement(False))
+                        self.isInsideFunc = True
+                        body = res.register(self.statement())
                         if res.error: return res
-                        return res.success(FuncDefNode(None, params, [body], True))
+                        self.isInsideFunc = False
+                        return res.success(FuncDefNode(id, params, [body], True))
                     else:
                         return res.failure(InvalidSyntaxError(tok.pos_start, self.current_token.pos_end, "Expected ')'"))  
             else:
@@ -313,6 +412,11 @@ class Parser:
             return res.failure(InvalidSyntaxError(tok.pos_start, self.current_token.pos_end, "Expected 'def' or 'lite'"))
                     
     def call(self):
+        """Parse the function call.
+
+        Returns:
+           ParseResult: the function call syntax tree.
+        """
         res = ParseResult()
         atom = res.register(self.atom())
         if res.error: return res
@@ -325,8 +429,6 @@ class Parser:
                 return res.success(FuncCallNode(atom, []))
             else:
                 tok = self.current_token
-                # res.register_advancement()
-                # self.advance()
                 arg = res.register(self.arguments())
                 if res.error:return res
                 if self.current_token.type == Tokens.RPAREN:
@@ -337,7 +439,12 @@ class Parser:
                     return res.failure(InvalidSyntaxError(tok.pos_start, self.current_token.pos_end, "Expected ')'"))
         return res.success(atom)
             
-    def statements(self, isInsideFunc):
+    def statements(self):
+        """Parse the multiple statements.
+
+        Returns:
+            List: the list of statements (BaseNode[]).
+        """
         res = ParseResult()
         statements = []
         pos_start = self.current_token.pos_start.copy()
@@ -346,7 +453,7 @@ class Parser:
             res.register_advancement()
             self.advance()
             
-        statement = res.register(self.statement(isInsideFunc))
+        statement = res.register(self.statement())
         if res.error: return res
         statements.append(statement)
         
@@ -361,7 +468,7 @@ class Parser:
             if self.current_token.type == Tokens.RBRCE:
                 break
             
-            statement = res.register(self.statement(isInsideFunc))
+            statement = res.register(self.statement())
             if res.error: return res
             statements.append(statement)
             
@@ -371,7 +478,12 @@ class Parser:
             
         return res.success(statements)
 
-    def return_expr(self, isInsideFunc):
+    def return_expr(self):
+        """Parse the return expression syntax.
+ 
+        Returns:
+            ParseResult: the return expression Node.
+        """
         res = ParseResult()
         tok = self.current_token
         if tok.matches(Tokens.KEYWORD, Tokens.RETURN):
@@ -379,7 +491,7 @@ class Parser:
             self.advance()
             
             if self.current_token.type == Tokens.NEWLINE:
-                if isInsideFunc:
+                if self.isInsideFunc:
                     return res.success(ReturnNode(None, tok.pos_start, tok.pos_end))
                 else:
                     return res.failure(InvalidSyntaxError(tok.pos_start, self.current_token.pos_end, "return statement outside function"))
@@ -387,7 +499,7 @@ class Parser:
                 expr = res.register(self.bool_expr())
                 if res.error: return res
                 
-                if isInsideFunc:
+                if self.isInsideFunc:
                     return res.success(ReturnNode(expr, tok.pos_start, self.current_token.pos_end))
                 else:
                     return res.failure(InvalidSyntaxError(tok.pos_start, self.current_token.pos_end, "return statement outside function"))
@@ -395,6 +507,11 @@ class Parser:
             return res.failure(InvalidSyntaxError(tok.pos_start, self.current_token.pos_end, "Expected 'return'"))
 
     def continue_expr(self):
+        """Parse the continue expression syntax.
+
+        Returns:
+            ParseResult: the continue expression Node.
+        """
         res = ParseResult()
         tok = self.current_token
         if tok.matches(Tokens.KEYWORD, Tokens.CONTINUE):
@@ -408,6 +525,11 @@ class Parser:
             return res.failure(InvalidSyntaxError(tok.pos_start, self.current_token.pos_end, "Expected 'continue'"))
 
     def break_expr(self):
+        """Parse the break expression syntax.
+
+        Returns:
+            ParseResult: the break expression Node.
+        """
         res = ParseResult()
         tok = self.current_token
         if tok.matches(Tokens.KEYWORD, Tokens.BREAK):
@@ -421,38 +543,18 @@ class Parser:
         else:
             return res.failure(InvalidSyntaxError(tok.pos_start, self.current_token.pos_end, "Expected 'Break'"))
          
-    def statement(self, isInsideFunc):
-        #res = ParseResult()
+    def statement(self):
+        """Parse a statement syntax.
+
+        Returns:
+            ParseResult: the statement syntax tree.
+        """
         tok = self.current_token
         if tok.matches(Tokens.KEYWORD, Tokens.RETURN):
-            return self.return_expr(isInsideFunc)
+            return self.return_expr()
         elif tok.matches(Tokens.KEYWORD, Tokens.CONTINUE):
             return self.continue_expr()
         elif tok.matches(Tokens.KEYWORD, Tokens.BREAK):
             return self.break_expr()
         else:
             return self.bool_expr()
-# class ParseResult:
-    
-#     def __init__(self):
-#         self.error = None
-#         self.node = None
-#         self.advance_count = 0
-    
-#     def register(self, res):
-#         self.advance_count += res.advance_count
-#         if res.error: self.error = res.error
-#         return res.node
-    
-#     def register_advancement(self):
-#         self.advance_count += 1
-#         return self
-    
-#     def success(self, node):
-#         self.node = node
-#         return self
-    
-#     def failure(self, error):
-#         if not self.error or self.advance_count == 0:
-#             self.error = error
-#         return self

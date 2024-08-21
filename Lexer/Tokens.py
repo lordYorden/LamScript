@@ -2,6 +2,7 @@ from enum import Enum
 import string
 
 class Tokens:
+    """Class that contains all the tokens that the lexer can understand."""
     #types
     INT = 'INT'
     BOOL = 'BOOL'
@@ -51,6 +52,14 @@ class Tokens:
 
 class Token:
     def __init__(self, type, value=None, pos_start=None, pos_end=None):
+        """Initializes the Token class.
+
+        Args:
+            type (character): The type of token.
+            value (int, None): The value of the token. Defaults to None.
+            pos_start (position, None): The start posithion of the object. Defaults to None.
+            pos_end (position, None):The end posithion of the object. Defaults to None.
+        """
         self.type = type
         self.value = value
         
@@ -63,9 +72,23 @@ class Token:
             self.pos_end = pos_end.copy()
             
     def matches(self, type_, value):
+        """Check if the token matches the given type and value.
+
+        Args:
+            type_ (character): The type of the token.
+            value (int): The value of the token.
+
+        Returns:
+            boolean: True if the token matches the given type and value, False otherwise.
+        """
         return self.type == type_ and self.value == value
     
     def __repr__(self):
+        """Return the string representation of the token.
+
+        Returns:
+            string: the string representation of the token.
+        """
         if self.value:
             return f"{self.type}: '{self.value}'"
         return f"{self.type}"

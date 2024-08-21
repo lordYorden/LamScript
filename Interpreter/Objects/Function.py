@@ -6,6 +6,14 @@ import Interpreter.interpreter as Interpreter
 
 class Function(BaseFunction):
     def __init__(self, name, body_nodes, arg_name, auto_return):
+        """initializes the Function object
+
+        Args:
+            name (string): the name of the function
+            body_nodes (node): the body of the function
+            arg_name (string): the name of the argument
+            auto_return (boolean): whether the function should return automatically
+        """
         super().__init__(name)
         self.name = name or "<anonymous>"
         self.body_nodes = body_nodes
@@ -13,6 +21,14 @@ class Function(BaseFunction):
         self.auto_return = auto_return
         
     def execute(self, args):
+        """Executes the function
+
+        Args:
+            args (object): the arguments passed into the function
+
+        Returns:
+            RuntimeResult: the result of the function execution
+        """
         res = Interpreter.RuntimeResult()
         interpreter = Interpreter.Interpreter()
         
@@ -33,10 +49,20 @@ class Function(BaseFunction):
             return res.success(Object.none)
     
     def copy(self):
+        """Copies the function object
+
+        Returns:
+            Function: the copied function object
+        """
         copy = Function(self.name, self.body_nodes, self.arg_name, self.auto_return)
         copy.set_context(self.context)
         copy.set_pos(self.pos_start, self.pos_end)
         return copy
         
     def __repr__(self):
+        """Return the string representation of the function
+
+        Returns:
+            string: the string representation of the function
+        """
         return f'<Function {self.name}>'

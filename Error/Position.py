@@ -1,5 +1,14 @@
 class Position:
     def __init__(self, index, ln, col, fn, ftxt):
+        """The position of the object in the file
+        could be a character, a token, a node, etc.
+        Args:
+            index (int): the index of the object in the file
+            ln (int): the line number
+            col (int): the column number
+            fn (string): file name
+            ftxt (string): file text
+        """
         self.index = index
         self.ln = ln
         self.col = col
@@ -7,6 +16,14 @@ class Position:
         self.ftxt = ftxt
 
     def advance(self, current_char=None):
+        """Advance the position of the object in the file
+
+        Args:
+            current_char (char, none): the current char that the program reads. Defaults to None.
+
+        Returns:
+            Position: the new position of the object
+        """
         self.index += 1
         self.col += 1
 
@@ -17,6 +34,14 @@ class Position:
         return self
     
     def backtrack(self, previous_char=None):
+        """Backtrack the position of the object in the file
+
+        Args:
+            previous_char (char, none): the previous chra that was read. Defaults to None.
+
+        Returns:
+            Position: the new position of the object
+        """
         self.index -= 1
         self.col -= 1
         
@@ -25,7 +50,14 @@ class Position:
         return self
     
     def extract_str(self, end_pos):
+        """Extract the text from the current position to the end position
 
+        Args:
+            end_pos (Postion): the end position of the object
+
+        Returns:
+            String: the extracted text
+        """
         lines = self.ftxt.splitlines()
         
         if self.ln == end_pos.ln:
@@ -41,4 +73,9 @@ class Position:
     
 
     def copy(self):
+        """Copies the current position
+
+        Returns:
+            Position: The coppied position
+        """
         return Position(self.index, self.ln, self.col, self.fn, self.ftxt)
