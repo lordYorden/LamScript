@@ -19,7 +19,6 @@ class BaseFunction(Object):
         Returns:
             context: the new context object
         """
-        from Interpreter.Context import Context
         context = Context(self.name, self.context, self.pos_start)
         return context
     
@@ -31,7 +30,7 @@ class BaseFunction(Object):
             args (object []): list of arguments
 
         Returns:
-            method: the success or failure method
+            RuntimeResult: dose the arguments pass the check
         """
         res = RuntimeResult()
         if len(args) > len(arg_names):
