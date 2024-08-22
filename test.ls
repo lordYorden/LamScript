@@ -66,6 +66,9 @@ print(false && true)
 print(true || false)
 print(!true)
 
+#test lite inside lite
+print((lite (x,y) x*y)((lite(x,y) x+y)(1,5),7))
+
 #lite(lambda) test Function composition in div by zero
 #demo error handling
 print((lite (x,y) x/y)((lite(x,y) x/y)(4,5),0))
